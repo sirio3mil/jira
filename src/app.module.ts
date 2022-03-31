@@ -15,7 +15,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         baseURL: configService.get('JIRA_BASE_URL'),
         headers: {
           Authorization: configService.get('JIRA_AUTH'),
-          Cookie: configService.get('JIRA_COOKIE'),
         },
       }),
       inject: [ConfigService],
