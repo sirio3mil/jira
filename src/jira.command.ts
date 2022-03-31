@@ -1,4 +1,5 @@
 import { Command, CommandRunner, Option } from 'nest-commander';
+import { JiraService } from './jira.service';
 import { LogService } from './log.service';
 
 interface BasicCommandOptions {
@@ -9,21 +10,14 @@ interface BasicCommandOptions {
 
 @Command({ name: 'jira', description: 'A parameter parse' })
 export class JiraCommand implements CommandRunner {
-  constructor(private readonly logService: LogService) {}
+  constructor(
+    private readonly logService: LogService,
+    private readonly jiraService: JiraService,
+  ) {}
 
-  async run(
-    passedParam: string[],
-    options?: BasicCommandOptions,
-  ): Promise<void> {
-    if (options?.boolean !== undefined && options?.boolean !== null) {
-      this.runWithBoolean(passedParam, options.boolean);
-    } else if (options?.number) {
-      this.runWithNumber(passedParam, options.number);
-    } else if (options?.string) {
-      this.runWithString(passedParam, options.string);
-    } else {
-      this.runWithNone(passedParam);
-    }
+  async run(): Promise<void> {
+    const tasks = await this.jiraService.findAll();
+    this.logService.log(tasks?.total);
   }
 
   @Option({
