@@ -1,12 +1,6 @@
-import { Command, CommandRunner, Option } from 'nest-commander';
+import { Command, CommandRunner } from 'nest-commander';
 import { JiraService } from './jira.service';
 import { LogService } from './log.service';
-
-interface BasicCommandOptions {
-  string?: string;
-  boolean?: boolean;
-  number?: number;
-}
 
 @Command({ name: 'jira', description: 'A parameter parse' })
 export class JiraCommand implements CommandRunner {
@@ -16,47 +10,15 @@ export class JiraCommand implements CommandRunner {
   ) {}
 
   async run(): Promise<void> {
-    const tasks = await this.jiraService.findAll();
-    this.logService.log(tasks?.total);
-  }
-
-  @Option({
-    flags: '-n, --number [number]',
-    description: 'A basic number parser',
-  })
-  parseNumber(val: string): number {
-    return Number(val);
-  }
-
-  @Option({
-    flags: '-s, --string [string]',
-    description: 'A string return',
-  })
-  parseString(val: string): string {
-    return val;
-  }
-
-  @Option({
-    flags: '-b, --boolean [boolean]',
-    description: 'A boolean parser',
-  })
-  parseBoolean(val: string): boolean {
-    return JSON.parse(val);
-  }
-
-  runWithString(param: string[], option: string): void {
-    this.logService.log({ param, string: option });
-  }
-
-  runWithNumber(param: string[], option: number): void {
-    this.logService.log({ param, number: option });
-  }
-
-  runWithBoolean(param: string[], option: boolean): void {
-    this.logService.log({ param, boolean: option });
-  }
-
-  runWithNone(param: string[]): void {
-    this.logService.log({ param });
+    let startAt = 0;
+    const maxResults = 50;
+    let tasks = await this.jiraService.findAll(startAt, maxResults);
+    const total = tasks?.total;
+    this.logService.log(total);
+    while (total && startAt + maxResults < total) {
+      startAt += maxResults;
+      tasks = await this.jiraService.findAll(startAt, maxResults);
+      this.logService.log(tasks.startAt);
+    }
   }
 }
