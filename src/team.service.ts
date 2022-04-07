@@ -34,7 +34,7 @@ export class TeamService {
         return {
           name: member.name,
           email: member.email,
-          membershipIntervals: member.membershipIntervals.map((interval) => {
+          membershipIntervals: member.membershipIntervals?.map((interval) => {
             return {
               start: interval?.start ? new Date(interval.start) : seniorityDate,
               end: interval?.end ? new Date(interval.end) : new Date(),
@@ -51,7 +51,17 @@ export class TeamService {
         seniority,
         salaries,
         code,
-        members,
+        members: members.filter((member) => {
+          if (!member.membershipIntervals?.length) {
+            return true;
+          }
+          const today = new Date();
+          const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+          const interval = member.membershipIntervals?.find(
+            (interval) => today >= interval.start && firstDay <= interval.end,
+          );
+          return !!interval;
+        }),
       });
     });
 

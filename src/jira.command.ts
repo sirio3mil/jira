@@ -35,10 +35,18 @@ export class JiraCommand implements CommandRunner {
     return seconds / 60 / 60 / 8;
   }
 
-  protected getTeam(email: string): any {
+  protected getTeam(email: string, date: Date): any {
     const team = this.teams.find(
       (team) =>
-        team.members.filter((member) => member.email === email).length > 0,
+        team.members.filter((member) => {
+          const interval = member.membershipIntervals?.find(
+            (interval) => date >= interval.start && date <= interval.end,
+          );
+          return (
+            member.email === email &&
+            (!member.membershipIntervals?.length || interval)
+          );
+        }).length > 0,
     );
     return team;
   }
@@ -132,7 +140,10 @@ export class JiraCommand implements CommandRunner {
       tasks.issues.forEach((issue) => {
         if (!issue.fields.assignee?.emailAddress) return;
         this.logService.log(issue.fields.assignee?.emailAddress);
-        const team = this.getTeam(issue.fields.assignee.emailAddress);
+        const date = issue.fields.updated
+          ? new Date(issue.fields.updated)
+          : new Date(issue.fields.created);
+        const team = this.getTeam(issue.fields.assignee.emailAddress, date);
         if (!team) return;
         this.logService.log(team.name);
         if (!issue.fields.customfield_10106) return;
