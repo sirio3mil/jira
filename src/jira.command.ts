@@ -4,6 +4,7 @@ import { LogService } from './log.service';
 import { Record } from './record.model';
 import { parse } from 'json2csv';
 import { createFile } from './storage.helper';
+import stacks from './config/teams.json';
 
 @Command({ name: 'jira', description: 'A parameter parse' })
 export class JiraCommand implements CommandRunner {
@@ -26,6 +27,14 @@ export class JiraCommand implements CommandRunner {
 
   protected secondsToWorkDays(seconds: number): number {
     return seconds / 60 / 60 / 8;
+  }
+
+  protected getTeam(email: string): any {
+    const team = stacks.teams.find(
+      (team) =>
+        team.members.filter((member) => member.email === email).length > 0,
+    );
+    return team;
   }
 
   /**
@@ -81,6 +90,11 @@ export class JiraCommand implements CommandRunner {
   async exportIssuesDataToCSV(): Promise<string> {
     return await this.getIssues()
       .then(async (issues) => {
+        if (!issues.length) {
+          Promise.reject(
+            new Error('No issues found. Please check your Jira credentials'),
+          );
+        }
         const csv = parse(issues, { fields: Object.keys(issues[0]) });
 
         const filePath = `files`;
@@ -101,32 +115,42 @@ export class JiraCommand implements CommandRunner {
 
   private async getIssues() {
     let startAt = 0;
+    let total = 0;
     const maxResults = 50;
-    let tasks = await this.jiraService.findAll(startAt, maxResults);
-    const total = tasks?.total;
-    this.logService.log(total);
     const records: Record[] = [];
-    while (total && startAt + maxResults < total) {
-      startAt += maxResults;
-      tasks = await this.jiraService.findAll(startAt, maxResults);
+    do {
+      const tasks = await this.jiraService.findAll(startAt, maxResults);
+      total = tasks?.total;
+      this.logService.log(total);
       this.logService.log(tasks.startAt);
       tasks.issues.forEach((issue) => {
+        if (!issue.fields.assignee?.emailAddress) return;
+        this.logService.log(issue.fields.assignee?.emailAddress);
+        const team = this.getTeam(issue.fields.assignee.emailAddress);
+        if (!team) return;
+        this.logService.log(team.name);
+        if (!issue.fields.customfield_10106) return;
+        if (!issue.fields.aggregatetimespent) return;
+        const timeEstimate = this.translateStoryPoints(
+          issue.fields.customfield_10106,
+          issue.fields.aggregatetimespent,
+        );
+        if (!timeEstimate) return;
         records.push({
+          team: team.name,
           key: issue.key,
           issueType: issue.fields.issuetype.name,
           projectName: issue.fields.project.name,
           aggregateTimeSpent: issue.fields.aggregatetimespent,
-          timeEstimate: this.translateStoryPoints(
-            issue.fields.customfield_10106,
-            issue.fields.aggregatetimespent,
-          ),
+          timeEstimate,
           created: issue.fields.created,
           updated: issue.fields.updated,
-          emailAddress: issue.fields.assignee?.emailAddress,
+          emailAddress: issue.fields.assignee.emailAddress,
           status: issue.fields.status.name,
         });
       });
-    }
+      startAt += maxResults;
+    } while (total && startAt < total);
     return records;
   }
 }

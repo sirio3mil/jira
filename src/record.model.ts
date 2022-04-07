@@ -8,4 +8,5 @@ export interface Record {
   updated: Date;
   emailAddress: string;
   status: string;
+  team: string;
 }

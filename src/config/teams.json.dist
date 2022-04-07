@@ -9,9 +9,9 @@
         "end": ""
       }],
       "seniorityDate": "",
-      "status": "",
+      "active": 1,
       "role": "",
-      "salary": ""
+      "salary": 0
     }]
   }]
 }
