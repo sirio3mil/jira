@@ -37,3 +37,4 @@ lerna-debug.log*
 # App
 .env
 /files/*.csv
+/src/config/teams.json

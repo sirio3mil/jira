@@ -1,0 +1,17 @@
+{
+  "teams": [{
+    "name": "",
+    "members": [{
+      "name": "",
+      "email": "",
+      "membershipIntervals": [{
+        "start": "",
+        "end": ""
+      }],
+      "seniorityDate": "",
+      "status": "",
+      "role": "",
+      "salary": ""
+    }]
+  }]
+}
