@@ -9,4 +9,8 @@ export interface Record {
   emailAddress: string;
   status: string;
   team: string;
+  seniority: number;
+  salaries: number;
+  code: number;
+  members: number;
 }

@@ -4,6 +4,7 @@ import { JiraCommand } from './jira.command';
 import { JiraService } from './jira.service';
 import { LogService } from './log.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TeamService } from './team.service';
 
 @Module({
   imports: [
@@ -20,6 +21,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService],
     }),
   ],
-  providers: [LogService, JiraCommand, JiraService],
+  providers: [LogService, JiraCommand, JiraService, TeamService],
 })
 export class AppModule {}

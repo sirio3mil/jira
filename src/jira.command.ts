@@ -4,14 +4,20 @@ import { LogService } from './log.service';
 import { Record } from './record.model';
 import { parse } from 'json2csv';
 import { createFile } from './storage.helper';
-import stacks from './config/teams.json';
+import { TeamService } from './team.service';
+import { Team } from './team.model';
 
 @Command({ name: 'jira', description: 'A parameter parse' })
 export class JiraCommand implements CommandRunner {
+  teams: Team[] = [];
+
   constructor(
     private readonly logService: LogService,
     private readonly jiraService: JiraService,
-  ) {}
+    private readonly teamService: TeamService,
+  ) {
+    this.teams = this.teamService.getTeams();
+  }
 
   protected hoursToSeconds(hours: number): number {
     return hours * 60 * 60;
@@ -30,7 +36,7 @@ export class JiraCommand implements CommandRunner {
   }
 
   protected getTeam(email: string): any {
-    const team = stacks.teams.find(
+    const team = this.teams.find(
       (team) =>
         team.members.filter((member) => member.email === email).length > 0,
     );
@@ -138,6 +144,10 @@ export class JiraCommand implements CommandRunner {
         if (!timeEstimate) return;
         records.push({
           team: team.name,
+          seniority: team.seniority,
+          salaries: team.salaries,
+          code: team.code,
+          members: team.members.length,
           key: issue.key,
           issueType: issue.fields.issuetype.name,
           projectName: issue.fields.project.name,
