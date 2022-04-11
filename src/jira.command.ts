@@ -61,6 +61,16 @@ export class JiraCommand implements CommandRunner {
     return team;
   }
 
+  protected getSourceIssue(issueLinks: any[]): string | null {
+    for (const issueLink of issueLinks) {
+      if (issueLink.type.name === 'Causes') {
+        return issueLink.inwardIssue?.key;
+      }
+    }
+
+    return null;
+  }
+
   /**
    * 13 puntos -> sprint entero
    * 8 puntos -> 5-7 días
@@ -183,6 +193,16 @@ export class JiraCommand implements CommandRunner {
             epics[issue.fields.customfield_10101] = epic;
           }
         }
+        let sourceIssue: any;
+        if (issue.fields.issuelinks?.length) {
+          this.logService.log(`Issue links: ${issue.fields.issuelinks.length}`);
+          const sourceIssueKey = this.getSourceIssue(issue.fields.issuelinks);
+          if (sourceIssueKey) {
+            this.logService.log(`Source Key: ${sourceIssueKey}`);
+            sourceIssue = await this.jiraService.findByKey(sourceIssueKey);
+            this.logService.log(sourceIssue.fields?.summary);
+          }
+        }
         records.push({
           team: team.name,
           seniority: team.seniority,
@@ -199,7 +219,9 @@ export class JiraCommand implements CommandRunner {
           emailAddress: issue.fields.assignee.emailAddress,
           status: issue.fields.status.name,
           epicKey: issue.fields.customfield_10101,
-          epicName: epic?.fields?.summary,
+          epicSummary: epic?.fields?.summary,
+          causedByKey: sourceIssue?.key,
+          causedBySummary: sourceIssue?.fields?.summary,
         });
       }
       startAt += maxResults;

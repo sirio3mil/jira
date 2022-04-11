@@ -14,5 +14,7 @@ export interface Record {
   code: number;
   members: number;
   epicKey: string;
-  epicName: string;
+  epicSummary: string;
+  causedByKey?: string;
+  causedBySummary?: string;
 }
