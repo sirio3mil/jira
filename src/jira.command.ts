@@ -210,6 +210,7 @@ export class JiraCommand implements CommandRunner {
           code: team.code,
           members: team.members.length,
           key: issue.key,
+          summary: issue.fields.summary,
           issueType: issue.fields.issuetype.name,
           projectName: issue.fields.project.name,
           aggregateTimeSpent: issue.fields.aggregatetimespent,

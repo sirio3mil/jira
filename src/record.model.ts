@@ -1,5 +1,6 @@
 export interface Record {
   key: string;
+  summary: string;
   issueType: string;
   projectName: string;
   aggregateTimeSpent: number;

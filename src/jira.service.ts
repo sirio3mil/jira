@@ -8,7 +8,7 @@ export class JiraService {
 
   async findAll(startAt = 0, maxResults = 50): Promise<any> {
     const config = {
-      url: `/search?jql=status = Terminado AND created > startOfMonth() AND type in (standardIssueTypes()) ORDER BY priority DESC, updated DESC&startAt=${startAt}&maxResults=${maxResults}&fields=*all`,
+      url: `/search?jql=status = Terminado AND updated >= startOfMonth() AND type in (standardIssueTypes()) ORDER BY priority DESC, updated DESC&startAt=${startAt}&maxResults=${maxResults}&fields=*all`,
     };
     return await lastValueFrom(
       this.httpService.get(config.url).pipe(
