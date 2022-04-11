@@ -18,4 +18,17 @@ export class JiraService {
       ),
     );
   }
+
+  async findByKey(key: string): Promise<any> {
+    const config = {
+      url: `/issue/${key}?fields=*all&fieldsByKeys=false`,
+    };
+    return await lastValueFrom(
+      this.httpService.get(config.url).pipe(
+        map((response) => {
+          return response.data;
+        }),
+      ),
+    );
+  }
 }

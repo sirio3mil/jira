@@ -14,4 +14,5 @@ export interface Record {
   code: number;
   members: number;
   epicKey: string;
+  epicName: string;
 }

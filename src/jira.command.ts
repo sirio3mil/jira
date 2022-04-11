@@ -35,7 +35,7 @@ export class JiraCommand implements CommandRunner {
     return seconds / 60 / 60 / 8;
   }
 
-  protected getTeam(email: string, date: Date): any {
+  protected getTeamByEmail(email: string, date: Date): any {
     const team = this.teams.find(
       (team) =>
         team.members.filter((member) => {
@@ -47,6 +47,16 @@ export class JiraCommand implements CommandRunner {
             (!member.membershipIntervals?.length || interval)
           );
         }).length > 0,
+    );
+    return team;
+  }
+
+  protected getTeamBySprint(sprint: string[]): any {
+    const team = this.teams.find(
+      (team) =>
+        sprint.filter((description) =>
+          description.toLowerCase().includes(team.name.toLowerCase()),
+        ).length > 0,
     );
     return team;
   }
@@ -110,9 +120,10 @@ export class JiraCommand implements CommandRunner {
           );
         }
         const csv = parse(issues, { fields: Object.keys(issues[0]) });
+        const dateFileName = new Date().toISOString().replace(/[-:.]/g, '');
 
         const filePath = `files`;
-        const fileName = `issues-${new Date().toISOString()}.csv`;
+        const fileName = `issues-${dateFileName}.csv`;
 
         await createFile(filePath, fileName, csv);
 
@@ -132,27 +143,46 @@ export class JiraCommand implements CommandRunner {
     let total = 0;
     const maxResults = 50;
     const records: Record[] = [];
+    const epics = {};
     do {
       const tasks = await this.jiraService.findAll(startAt, maxResults);
       total = tasks?.total;
       this.logService.log(total);
       this.logService.log(tasks.startAt);
-      tasks.issues.forEach((issue) => {
-        if (!issue.fields.assignee?.emailAddress) return;
+      for (const issue of tasks.issues) {
+        let epic = {} as any;
+        if (!issue.fields.assignee?.emailAddress) continue;
         this.logService.log(issue.fields.assignee?.emailAddress);
         const date = issue.fields.updated
           ? new Date(issue.fields.updated)
           : new Date(issue.fields.created);
-        const team = this.getTeam(issue.fields.assignee.emailAddress, date);
-        if (!team) return;
+        this.logService.log(date);
+        let team: any;
+        if (issue.fields.customfield_10105) {
+          team = this.getTeamBySprint(issue.fields.customfield_10105);
+        }
+        if (!team) {
+          team = this.getTeamByEmail(issue.fields.assignee.emailAddress, date);
+        }
+        if (!team) continue;
         this.logService.log(team.name);
-        if (!issue.fields.customfield_10106) return;
-        if (!issue.fields.aggregatetimespent) return;
+        if (!issue.fields.customfield_10106) continue;
+        if (!issue.fields.aggregatetimespent) continue;
         const timeEstimate = this.translateStoryPoints(
           issue.fields.customfield_10106,
           issue.fields.aggregatetimespent,
         );
-        if (!timeEstimate) return;
+        if (!timeEstimate) continue;
+        if (!!issue.fields.customfield_10101) {
+          epic = epics[issue.fields.customfield_10101];
+          if (!epic) {
+            epic = await this.jiraService.findByKey(
+              issue.fields.customfield_10101,
+            );
+            this.logService.log(epic.fields?.summary);
+            epics[issue.fields.customfield_10101] = epic;
+          }
+        }
         records.push({
           team: team.name,
           seniority: team.seniority,
@@ -169,10 +199,12 @@ export class JiraCommand implements CommandRunner {
           emailAddress: issue.fields.assignee.emailAddress,
           status: issue.fields.status.name,
           epicKey: issue.fields.customfield_10101,
+          epicName: epic?.fields?.summary,
         });
-      });
+      }
       startAt += maxResults;
     } while (total && startAt < total);
+    this.logService.log(records.length);
     return records;
   }
 }
