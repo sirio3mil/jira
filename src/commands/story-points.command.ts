@@ -57,8 +57,8 @@ export class StoryPointsCommand implements CommandRunner {
     return null;
   }
 
-  async exportIssuesDataToCSV(): Promise<string> {
-    return await this.getIssues()
+  async exportIssuesDataToCSV(passedParam: string[]): Promise<string> {
+    return await this.getIssues(passedParam)
       .then(async (issues) => {
         if (!issues.length) {
           Promise.reject(
@@ -78,20 +78,30 @@ export class StoryPointsCommand implements CommandRunner {
       .catch((error) => Promise.reject(error));
   }
 
-  async run(): Promise<void> {
-    this.exportIssuesDataToCSV().then((fileName) => {
+  async run(passedParam: string[]): Promise<void> {
+    this.exportIssuesDataToCSV(passedParam).then((fileName) => {
       this.logService.log(`${fileName} created`);
     });
   }
 
-  private async getIssues() {
+  private async getIssues(passedParam: string[]) {
     let startAt = 0;
     let total = 0;
     const maxResults = 50;
     const records: Record[] = [];
     const epics = {};
+    const startDate =
+      !!passedParam[0] && !isNaN(Date.parse(passedParam[0]))
+        ? passedParam[0]
+        : 'startOfMonth()';
+    const endDate =
+      !!passedParam[1] && !isNaN(Date.parse(passedParam[1]))
+        ? passedParam[1]
+        : 'endOfMonth()';
     do {
-      const tasks = await this.jiraService.findAll(startAt, maxResults);
+      const jql = `jql=status = Terminado AND created >= ${startDate} AND created <= ${endDate} AND type in (standardIssueTypes()) ORDER BY priority DESC, updated DESC&startAt=${startAt}&maxResults=${maxResults}&fields=*all`;
+      this.logService.log(jql);
+      const tasks = await this.jiraService.findAll(jql);
       total = tasks?.total;
       this.logService.log(total);
       this.logService.log(tasks.startAt);

@@ -6,9 +6,9 @@ import { lastValueFrom, map } from 'rxjs';
 export class JiraService {
   constructor(private httpService: HttpService) {}
 
-  async findAll(startAt = 0, maxResults = 50): Promise<any> {
+  async findAll(args: string): Promise<any> {
     const config = {
-      url: `/search?jql=status = Terminado AND updated >= startOfMonth() AND type in (standardIssueTypes()) ORDER BY priority DESC, updated DESC&startAt=${startAt}&maxResults=${maxResults}&fields=*all`,
+      url: `/search?${args}`,
     };
     return await lastValueFrom(
       this.httpService.get(config.url).pipe(
