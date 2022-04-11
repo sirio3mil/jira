@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { StoryPointsCommand } from './commands/story-points.command';
@@ -5,6 +6,7 @@ import { JiraService } from './services/jira.service';
 import { LogService } from './services/log.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TeamService } from './services/team.service';
+import { StoryPointService } from './services/story-point.service';
 
 @Module({
   imports: [
@@ -21,6 +23,6 @@ import { TeamService } from './services/team.service';
       inject: [ConfigService],
     }),
   ],
-  providers: [LogService, StoryPointsCommand, JiraService, TeamService],
+  providers: [LogService, StoryPointsCommand, JiraService, TeamService, StoryPointService],
 })
 export class AppModule {}

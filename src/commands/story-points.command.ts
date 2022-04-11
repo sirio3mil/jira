@@ -6,6 +6,7 @@ import { parse } from 'json2csv';
 import { createFile } from '../storage.helper';
 import { TeamService } from '../services/team.service';
 import { Team } from '../models/team.model';
+import { StoryPointService } from 'src/services/story-point.service';
 
 @Command({ name: 'storyPoints', description: 'Get story points stats' })
 export class StoryPointsCommand implements CommandRunner {
@@ -15,24 +16,9 @@ export class StoryPointsCommand implements CommandRunner {
     private readonly logService: LogService,
     private readonly jiraService: JiraService,
     private readonly teamService: TeamService,
+    private readonly storyPointService: StoryPointService,
   ) {
     this.teams = this.teamService.getTeams();
-  }
-
-  protected hoursToSeconds(hours: number): number {
-    return hours * 60 * 60;
-  }
-
-  protected workDaysToSeconds(workDays: number): number {
-    return workDays * 60 * 60 * 8;
-  }
-
-  protected secondsToHours(seconds: number): number {
-    return seconds / 60 / 60;
-  }
-
-  protected secondsToWorkDays(seconds: number): number {
-    return seconds / 60 / 60 / 8;
   }
 
   protected getTeamByEmail(email: string, date: Date): any {
@@ -69,56 +55,6 @@ export class StoryPointsCommand implements CommandRunner {
     }
 
     return null;
-  }
-
-  /**
-   * 13 puntos -> sprint entero
-   * 8 puntos -> 5-7 días
-   * 5 puntos -> 3-4 días
-   * 3 puntos -> un par de días
-   * 2 puntos -> 1 día
-   * 1 puntos -> "una mañana"
-   * 0,5 -> "un rato"
-   * @param storyPoints
-   * @param aggregateTimeSpent
-   * @returns number
-   */
-  protected translateStoryPoints(
-    storyPoints: number,
-    aggregateTimeSpent: number,
-  ): number {
-    if (storyPoints === 0.5) {
-      return this.hoursToSeconds(2);
-    }
-    if (storyPoints === 1) {
-      return this.hoursToSeconds(4);
-    }
-    if (storyPoints === 2) {
-      return this.workDaysToSeconds(1);
-    }
-    if (storyPoints === 3) {
-      return this.workDaysToSeconds(2);
-    }
-    if (storyPoints === 13) {
-      return this.workDaysToSeconds(10);
-    }
-    const days = this.secondsToWorkDays(aggregateTimeSpent);
-    if (storyPoints === 5) {
-      if (days >= 3) {
-        return this.workDaysToSeconds(4);
-      }
-      return this.workDaysToSeconds(3);
-    }
-    if (storyPoints === 8) {
-      if (days >= 6) {
-        return this.workDaysToSeconds(7);
-      }
-      if (days >= 5) {
-        return this.workDaysToSeconds(6);
-      }
-      return this.workDaysToSeconds(5);
-    }
-    return 0;
   }
 
   async exportIssuesDataToCSV(): Promise<string> {
@@ -178,7 +114,7 @@ export class StoryPointsCommand implements CommandRunner {
         this.logService.log(team.name);
         if (!issue.fields.customfield_10106) continue;
         if (!issue.fields.aggregatetimespent) continue;
-        const timeEstimate = this.translateStoryPoints(
+        const timeEstimate = this.storyPointService.toSeconds(
           issue.fields.customfield_10106,
           issue.fields.aggregatetimespent,
         );
