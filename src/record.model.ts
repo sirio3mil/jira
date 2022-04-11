@@ -13,4 +13,5 @@ export interface Record {
   salaries: number;
   code: number;
   members: number;
+  epicKey: string;
 }

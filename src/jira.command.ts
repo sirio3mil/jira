@@ -168,6 +168,7 @@ export class JiraCommand implements CommandRunner {
           updated: issue.fields.updated,
           emailAddress: issue.fields.assignee.emailAddress,
           status: issue.fields.status.name,
+          epicKey: issue.fields.customfield_10101,
         });
       });
       startAt += maxResults;
