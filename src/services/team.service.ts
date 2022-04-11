@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { Team } from './team.model';
-import stacks from './config/teams.json';
+import { Team } from '../models/team.model';
+import stacks from '../config/teams.json';
 
 @Injectable()
 export class TeamService {

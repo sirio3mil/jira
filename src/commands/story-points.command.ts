@@ -1,14 +1,14 @@
 import { Command, CommandRunner } from 'nest-commander';
-import { JiraService } from './jira.service';
-import { LogService } from './log.service';
-import { Record } from './record.model';
+import { JiraService } from '../services/jira.service';
+import { LogService } from '../services/log.service';
+import { Record } from '../models/record.model';
 import { parse } from 'json2csv';
-import { createFile } from './storage.helper';
-import { TeamService } from './team.service';
-import { Team } from './team.model';
+import { createFile } from '../storage.helper';
+import { TeamService } from '../services/team.service';
+import { Team } from '../models/team.model';
 
-@Command({ name: 'jira', description: 'A parameter parse' })
-export class JiraCommand implements CommandRunner {
+@Command({ name: 'storyPoints', description: 'Get story points stats' })
+export class StoryPointsCommand implements CommandRunner {
   teams: Team[] = [];
 
   constructor(

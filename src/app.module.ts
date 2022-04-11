@@ -1,10 +1,10 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
-import { JiraCommand } from './jira.command';
-import { JiraService } from './jira.service';
-import { LogService } from './log.service';
+import { StoryPointsCommand } from './commands/story-points.command';
+import { JiraService } from './services/jira.service';
+import { LogService } from './services/log.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TeamService } from './team.service';
+import { TeamService } from './services/team.service';
 
 @Module({
   imports: [
@@ -21,6 +21,6 @@ import { TeamService } from './team.service';
       inject: [ConfigService],
     }),
   ],
-  providers: [LogService, JiraCommand, JiraService, TeamService],
+  providers: [LogService, StoryPointsCommand, JiraService, TeamService],
 })
 export class AppModule {}
