@@ -6,4 +6,5 @@ export interface Team {
   salaries?: number;
   code?: number;
   members?: Member[];
+  color: string;
 }

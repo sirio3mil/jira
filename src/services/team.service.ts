@@ -48,6 +48,7 @@ export class TeamService {
       });
       teams.push({
         name: team.name,
+        color: team.color || team.stack,
         seniority,
         salaries,
         code,

@@ -169,6 +169,7 @@ export class StoryPointsCommand implements CommandRunner {
           epicSummary: epic?.fields?.summary,
           causedByKey: sourceIssue?.key,
           causedBySummary: sourceIssue?.fields?.summary,
+          color: team.color,
         });
       }
       startAt += maxResults;

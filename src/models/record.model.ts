@@ -18,4 +18,5 @@ export interface Record {
   epicSummary: string;
   causedByKey?: string;
   causedBySummary?: string;
+  color: string;
 }

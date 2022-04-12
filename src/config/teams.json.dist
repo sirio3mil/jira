@@ -1,6 +1,8 @@
 {
   "teams": [{
     "name": "",
+    "stack": "",
+    "color": "",
     "members": [{
       "name": "",
       "email": "",
