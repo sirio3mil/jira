@@ -8,8 +8,8 @@ import { TeamService } from '../services/team.service';
 import { Team } from '../models/team.model';
 import { StoryPointService } from 'src/services/story-point.service';
 
-@Command({ name: 'storyPoints', description: 'Get story points stats' })
-export class StoryPointsCommand implements CommandRunner {
+@Command({ name: 'ratio', description: 'Get story points ratio stats' })
+export class RatioCommand implements CommandRunner {
   teams: Team[] = [];
 
   constructor(

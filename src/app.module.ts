@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
-import { StoryPointsCommand } from './commands/story-points.command';
+import { RatioCommand } from './commands/ratio.command';
 import { JiraService } from './services/jira.service';
 import { LogService } from './services/log.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -23,6 +23,6 @@ import { StoryPointService } from './services/story-point.service';
       inject: [ConfigService],
     }),
   ],
-  providers: [LogService, StoryPointsCommand, JiraService, TeamService, StoryPointService],
+  providers: [LogService, RatioCommand, JiraService, TeamService, StoryPointService],
 })
 export class AppModule {}
