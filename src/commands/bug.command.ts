@@ -46,27 +46,30 @@ export class BugCommand extends TeamCommand {
         : 'endOfMonth()';
     do {
       const jql = `jql=created >= ${startDate} AND created <= ${endDate} AND type in (Defecto, Bug) ORDER BY priority DESC, updated DESC&startAt=${startAt}&maxResults=${maxResults}&fields=*all`;
-      this.logService.log(jql);
       const tasks = await this.jiraService.findAll(jql);
       total = tasks?.total;
-      this.logService.log(total);
-      this.logService.log(tasks.startAt);
+      this.logService.log(`Total: ${total}`);
       for (const issue of tasks.issues) {
-        if (!issue.fields.assignee?.emailAddress) continue;
-        this.logService.log(issue.fields.assignee?.emailAddress);
+        if (!issue.fields.assignee?.emailAddress) {
+          this.logService.log(`No assignee: ${issue.key}`);
+          continue;
+        }
         const date = issue.fields.updated
           ? new Date(issue.fields.updated)
           : new Date(issue.fields.created);
-        this.logService.log(date);
         let team: any;
         if (issue.fields.customfield_10105) {
           team = this.getTeamBySprint(issue.fields.customfield_10105);
         }
         if (!team) {
           team = this.getTeamByEmail(issue.fields.assignee.emailAddress, date);
+          if (!team) {
+            this.logService.log(
+              'No team found for ' + issue.fields.assignee.emailAddress,
+            );
+          }
         }
         if (!team) continue;
-        this.logService.log(team.name);
         const solver = team.members.find(
           (member: { email: string }) =>
             member.email === issue.fields.assignee.emailAddress,
@@ -74,12 +77,9 @@ export class BugCommand extends TeamCommand {
         let sourceIssue: any;
         let assigned: any;
         if (issue.fields.issuelinks?.length) {
-          this.logService.log(`Issue links: ${issue.fields.issuelinks.length}`);
           const sourceIssueKey = this.getSourceIssue(issue.fields.issuelinks);
           if (sourceIssueKey) {
-            this.logService.log(`Source Key: ${sourceIssueKey}`);
             sourceIssue = await this.jiraService.findByKey(sourceIssueKey);
-            this.logService.log(sourceIssue.fields?.summary);
             assigned = team.members.find(
               (member: { email: string }) =>
                 member.email === sourceIssue.fields?.assignee?.emailAddress,
