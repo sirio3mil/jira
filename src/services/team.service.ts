@@ -30,7 +30,8 @@ export class TeamService {
         code += this.codes[member.role]();
         salaries += member.salary;
         const seniorityDate = new Date(member.seniorityDate);
-        seniority += this.monthDiff(seniorityDate);
+        const months = this.monthDiff(seniorityDate);
+        seniority += months;
         return {
           name: member.name,
           email: member.email,
@@ -44,6 +45,7 @@ export class TeamService {
           active: !!member.active,
           role: member.role,
           salary: member.salary,
+          seniority: months,
         };
       });
       teams.push({

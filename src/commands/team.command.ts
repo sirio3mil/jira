@@ -7,6 +7,8 @@ import { Team } from '../models/team.model';
 
 export abstract class TeamCommand implements CommandRunner {
   teams: Team[] = [];
+  prefix = 'issues';
+  folder = 'files';
 
   constructor(
     protected readonly logService: LogService,
@@ -62,8 +64,8 @@ export abstract class TeamCommand implements CommandRunner {
         const csv = parse(issues, { fields: Object.keys(issues[0]) });
         const dateFileName = new Date().toISOString().replace(/[-:.]/g, '');
 
-        const filePath = `files`;
-        const fileName = `issues-${dateFileName}.csv`;
+        const filePath = this.folder;
+        const fileName = `${this.prefix}-${dateFileName}.csv`;
 
         await createFile(filePath, fileName, csv);
 

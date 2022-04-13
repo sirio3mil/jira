@@ -7,6 +7,7 @@ import { LogService } from './services/log.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TeamService } from './services/team.service';
 import { StoryPointService } from './services/story-point.service';
+import { BugCommand } from './commands/bug.command';
 
 @Module({
   imports: [
@@ -23,6 +24,13 @@ import { StoryPointService } from './services/story-point.service';
       inject: [ConfigService],
     }),
   ],
-  providers: [LogService, RatioCommand, JiraService, TeamService, StoryPointService],
+  providers: [
+    LogService, 
+    RatioCommand, 
+    BugCommand, 
+    JiraService, 
+    TeamService, 
+    StoryPointService
+  ],
 })
 export class AppModule {}
