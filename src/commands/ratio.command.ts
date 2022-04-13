@@ -1,90 +1,23 @@
-import { Command, CommandRunner } from 'nest-commander';
+import { Command } from 'nest-commander';
 import { JiraService } from '../services/jira.service';
 import { LogService } from '../services/log.service';
 import { Record } from '../models/record.model';
-import { parse } from 'json2csv';
-import { createFile } from '../storage.helper';
 import { TeamService } from '../services/team.service';
-import { Team } from '../models/team.model';
 import { StoryPointService } from 'src/services/story-point.service';
+import { TeamCommand } from './team.command';
 
 @Command({ name: 'ratio', description: 'Get story points ratio stats' })
-export class RatioCommand implements CommandRunner {
-  teams: Team[] = [];
-
+export class RatioCommand extends TeamCommand {
   constructor(
-    private readonly logService: LogService,
-    private readonly jiraService: JiraService,
-    private readonly teamService: TeamService,
-    private readonly storyPointService: StoryPointService,
+    protected readonly logService: LogService,
+    protected readonly jiraService: JiraService,
+    protected readonly teamService: TeamService,
+    protected readonly storyPointService: StoryPointService,
   ) {
-    this.teams = this.teamService.getTeams();
+    super(logService, teamService);
   }
 
-  protected getTeamByEmail(email: string, date: Date): any {
-    const team = this.teams.find(
-      (team) =>
-        team.members.filter((member) => {
-          const interval = member.membershipIntervals?.find(
-            (interval) => date >= interval.start && date <= interval.end,
-          );
-          return (
-            member.email === email &&
-            (!member.membershipIntervals?.length || interval)
-          );
-        }).length > 0,
-    );
-    return team;
-  }
-
-  protected getTeamBySprint(sprint: string[]): any {
-    const team = this.teams.find(
-      (team) =>
-        sprint.filter((description) =>
-          description.toLowerCase().includes(team.name.toLowerCase()),
-        ).length > 0,
-    );
-    return team;
-  }
-
-  protected getSourceIssue(issueLinks: any[]): string | null {
-    for (const issueLink of issueLinks) {
-      if (issueLink.type.name === 'Causes') {
-        return issueLink.inwardIssue?.key;
-      }
-    }
-
-    return null;
-  }
-
-  async exportIssuesDataToCSV(passedParam: string[]): Promise<string> {
-    return await this.getIssues(passedParam)
-      .then(async (issues) => {
-        if (!issues.length) {
-          Promise.reject(
-            new Error('No issues found. Please check your Jira credentials'),
-          );
-        }
-        const csv = parse(issues, { fields: Object.keys(issues[0]) });
-        const dateFileName = new Date().toISOString().replace(/[-:.]/g, '');
-
-        const filePath = `files`;
-        const fileName = `issues-${dateFileName}.csv`;
-
-        await createFile(filePath, fileName, csv);
-
-        return Promise.resolve(fileName);
-      })
-      .catch((error) => Promise.reject(error));
-  }
-
-  async run(passedParam: string[]): Promise<void> {
-    this.exportIssuesDataToCSV(passedParam).then((fileName) => {
-      this.logService.log(`${fileName} created`);
-    });
-  }
-
-  private async getIssues(passedParam: string[]) {
+  protected async getIssues(passedParam: string[]) {
     let startAt = 0;
     let total = 0;
     const maxResults = 50;
