@@ -8,6 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TeamService } from './services/team.service';
 import { StoryPointService } from './services/story-point.service';
 import { BugCommand } from './commands/bug.command';
+import { TaskCommand } from './commands/task.command';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { BugCommand } from './commands/bug.command';
     LogService, 
     RatioCommand, 
     BugCommand, 
+    TaskCommand,
     JiraService, 
     TeamService, 
     StoryPointService
