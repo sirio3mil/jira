@@ -115,11 +115,6 @@ export class TaskCommand extends TeamCommand {
       total = tasks?.total;
       this.logService.log(`Total: ${total}`);
       for (const issue of tasks.issues) {
-        if (!issue.fields.assignee?.emailAddress) {
-          this.logService.log(`No assignee: ${issue.key}`);
-          this.ignoredTasks.push(issue.key);
-          continue;
-        }
         if (!issue.fields.aggregatetimespent) {
           this.logService.log(`No time spent: ${issue.key}`);
           this.ignoredTasks.push(issue.key);
@@ -173,11 +168,6 @@ export class TaskCommand extends TeamCommand {
       total = tasks?.total;
       this.logService.log(`Total: ${total}`);
       for (const issue of tasks.issues) {
-        if (!issue.fields.assignee?.emailAddress) {
-          this.logService.log(`No assignee: ${issue.key}`);
-          this.ignoredTasks.push(issue.key);
-          continue;
-        }
         if (!issue.fields.aggregatetimespent) {
           this.logService.log(`No time spent: ${issue.key}`);
           this.ignoredTasks.push(issue.key);

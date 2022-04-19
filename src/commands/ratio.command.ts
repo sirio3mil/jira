@@ -40,8 +40,6 @@ export class RatioCommand extends TeamCommand {
       this.logService.log(tasks.startAt);
       for (const issue of tasks.issues) {
         let epic = {} as any;
-        if (!issue.fields.assignee?.emailAddress) continue;
-        this.logService.log(issue.fields.assignee?.emailAddress);
         const date = issue.fields.updated
           ? new Date(issue.fields.updated)
           : new Date(issue.fields.created);

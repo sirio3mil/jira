@@ -50,10 +50,6 @@ export class BugCommand extends TeamCommand {
       total = tasks?.total;
       this.logService.log(`Total: ${total}`);
       for (const issue of tasks.issues) {
-        if (!issue.fields.assignee?.emailAddress) {
-          this.logService.log(`No assignee: ${issue.key}`);
-          continue;
-        }
         const date = issue.fields.updated
           ? new Date(issue.fields.updated)
           : new Date(issue.fields.created);
