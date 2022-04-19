@@ -45,7 +45,7 @@ export class BugCommand extends TeamCommand {
         ? passedParam[1]
         : 'endOfMonth()';
     do {
-      const jql = `jql=created >= ${startDate} AND created <= ${endDate} AND type in (Defecto, Bug) ORDER BY priority DESC, updated DESC&startAt=${startAt}&maxResults=${maxResults}&fields=*all`;
+      const jql = `jql=created >= ${startDate} AND created <= ${endDate} AND type in (Defecto, Bug) and project not in ("Service Desk Pruebas") ORDER BY priority DESC, updated DESC&startAt=${startAt}&maxResults=${maxResults}&fields=*all`;
       const tasks = await this.jiraService.findAll(jql);
       total = tasks?.total;
       this.logService.log(`Total: ${total}`);

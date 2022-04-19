@@ -6,9 +6,15 @@ import { StoryPointService } from 'src/services/story-point.service';
 import { TeamCommand } from './team.command';
 import { Stat } from 'src/models/stat.model';
 import { StatRecord } from 'src/models/stat-record.model';
+import * as fs from 'fs';
 
 @Command({ name: 'task', description: 'Get bugs and defects stats' })
 export class TaskCommand extends TeamCommand {
+  unidentifiedMails: string[] = [];
+  ignoredTasks: string[] = [];
+  defaultStartDate = 'startOfMonth()';
+  defaultEndDate = 'endOfMonth()';
+
   constructor(
     protected readonly logService: LogService,
     protected readonly jiraService: JiraService,
@@ -17,6 +23,43 @@ export class TaskCommand extends TeamCommand {
   ) {
     super(logService, teamService);
     this.prefix = 'tasks';
+  }
+
+  protected logInoredTasks() {
+    if (this.ignoredTasks.length) {
+      const unique = [...new Set(this.ignoredTasks)];
+      const dateFileName = new Date().toISOString().replace(/[-:.]/g, '');
+
+      const filePath = this.folder;
+      const fileName = `ignored-tasks-${dateFileName}.csv`;
+      const file = fs.createWriteStream(`${filePath}/${fileName}`);
+      file.on('error', function (err) {
+        this.logService.log(err);
+      });
+      unique.forEach(function (item) {
+        file.write(item + '\n');
+      });
+      file.end();
+    }
+  }
+
+  protected logUnidentifiedMails() {
+    if (this.unidentifiedMails.length) {
+      const unique = [...new Set(this.unidentifiedMails)];
+      const dateFileName = new Date().toISOString().replace(/[-:.]/g, '');
+
+      const filePath = this.folder;
+      const fileName = `unidentified-mails-${dateFileName}.csv`;
+
+      const file = fs.createWriteStream(`${filePath}/${fileName}`);
+      file.on('error', function (err) {
+        this.logService.log(err);
+      });
+      unique.forEach(function (item) {
+        file.write(item + '\n');
+      });
+      file.end();
+    }
   }
 
   protected getSourceIssue(issueLinks: any[]): string | null {
@@ -38,6 +81,8 @@ export class TaskCommand extends TeamCommand {
       this.getTasks(passedParam),
       this.getBugs(passedParam),
     ]);
+    this.logInoredTasks();
+    this.logUnidentifiedMails();
     for (const team of this.teams) {
       const record: StatRecord = {
         team: team.name,
@@ -59,23 +104,25 @@ export class TaskCommand extends TeamCommand {
     const startDate =
       !!passedParam[0] && !isNaN(Date.parse(passedParam[0]))
         ? passedParam[0]
-        : 'startOfYear()';
+        : this.defaultStartDate;
     const endDate =
       !!passedParam[1] && !isNaN(Date.parse(passedParam[1]))
         ? passedParam[1]
-        : 'endOfMonth()';
+        : this.defaultEndDate;
     do {
-      const jql = `jql=created >= ${startDate} AND created <= ${endDate} AND type in (Story,Task) and status = Terminado ORDER BY priority DESC, updated DESC&startAt=${startAt}&maxResults=${maxResults}&fields=*all`;
+      const jql = `jql=created >= ${startDate} AND created <= ${endDate} AND type in (Story,Task) and status = Terminado and project not in ("Service Desk Pruebas") ORDER BY priority DESC, updated DESC&startAt=${startAt}&maxResults=${maxResults}&fields=*all`;
       const tasks = await this.jiraService.findAll(jql);
       total = tasks?.total;
       this.logService.log(`Total: ${total}`);
       for (const issue of tasks.issues) {
         if (!issue.fields.assignee?.emailAddress) {
           this.logService.log(`No assignee: ${issue.key}`);
+          this.ignoredTasks.push(issue.key);
           continue;
         }
         if (!issue.fields.aggregatetimespent) {
           this.logService.log(`No time spent: ${issue.key}`);
+          this.ignoredTasks.push(issue.key);
           continue;
         }
         const date = issue.fields.updated
@@ -91,6 +138,8 @@ export class TaskCommand extends TeamCommand {
             this.logService.log(
               'No team found for ' + issue.fields.assignee.emailAddress,
             );
+            //this.ignoredTasks.push(issue.key);
+            this.unidentifiedMails.push(issue.fields.assignee.emailAddress);
           }
         }
         if (!team) continue;
@@ -113,23 +162,25 @@ export class TaskCommand extends TeamCommand {
     const startDate =
       !!passedParam[0] && !isNaN(Date.parse(passedParam[0]))
         ? passedParam[0]
-        : 'startOfYear()';
+        : this.defaultStartDate;
     const endDate =
       !!passedParam[1] && !isNaN(Date.parse(passedParam[1]))
         ? passedParam[1]
-        : 'endOfMonth()';
+        : this.defaultEndDate;
     do {
-      const jql = `jql=created >= ${startDate} AND created <= ${endDate} AND type in (Defecto, Bug)  and status = Terminado ORDER BY priority DESC, updated DESC&startAt=${startAt}&maxResults=${maxResults}&fields=*all`;
+      const jql = `jql=created >= ${startDate} AND created <= ${endDate} AND type in (Defecto, Bug)  and status = Terminado and project not in ("Service Desk Pruebas") ORDER BY priority DESC, updated DESC&startAt=${startAt}&maxResults=${maxResults}&fields=*all`;
       const tasks = await this.jiraService.findAll(jql);
       total = tasks?.total;
       this.logService.log(`Total: ${total}`);
       for (const issue of tasks.issues) {
         if (!issue.fields.assignee?.emailAddress) {
           this.logService.log(`No assignee: ${issue.key}`);
+          this.ignoredTasks.push(issue.key);
           continue;
         }
         if (!issue.fields.aggregatetimespent) {
           this.logService.log(`No time spent: ${issue.key}`);
+          this.ignoredTasks.push(issue.key);
           continue;
         }
         const date = issue.fields.updated
@@ -145,6 +196,8 @@ export class TaskCommand extends TeamCommand {
             this.logService.log(
               'No team found for ' + issue.fields.assignee.emailAddress,
             );
+            this.unidentifiedMails.push(issue.fields.assignee.emailAddress);
+            //this.ignoredTasks.push(issue.key);
           }
         }
         if (!team) continue;
