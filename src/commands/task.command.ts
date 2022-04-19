@@ -16,7 +16,7 @@ export class TaskCommand extends TeamCommand {
     protected readonly storyPointService: StoryPointService,
   ) {
     super(logService, teamService);
-    this.prefix = 'bugs';
+    this.prefix = 'tasks';
   }
 
   protected getSourceIssue(issueLinks: any[]): string | null {
