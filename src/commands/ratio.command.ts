@@ -48,7 +48,7 @@ export class RatioCommand extends TeamCommand {
         if (issue.fields.customfield_10105) {
           team = this.getTeamBySprint(issue.fields.customfield_10105);
         }
-        if (!team) {
+        if (!team && issue.fields.assignee?.emailAddress) {
           team = this.getTeamByEmail(issue.fields.assignee.emailAddress, date);
         }
         if (!team) continue;
