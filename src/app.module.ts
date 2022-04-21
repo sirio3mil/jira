@@ -9,6 +9,7 @@ import { TeamService } from './services/team.service';
 import { StoryPointService } from './services/story-point.service';
 import { BugCommand } from './commands/bug.command';
 import { TaskCommand } from './commands/task.command';
+import { IssueService } from './services/issue.service';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { TaskCommand } from './commands/task.command';
     TaskCommand,
     JiraService, 
     TeamService, 
+    IssueService,
     StoryPointService
   ],
 })

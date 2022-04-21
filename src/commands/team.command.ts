@@ -4,15 +4,18 @@ import { parse } from 'json2csv';
 import { createFile } from '../storage.helper';
 import { TeamService } from '../services/team.service';
 import { Team } from '../models/team.model';
+import { IssueService } from 'src/services/issue.service';
 
 export abstract class TeamCommand implements CommandRunner {
   teams: Team[] = [];
   prefix = 'issues';
   folder = 'files';
+  unidentifiedMails: string[] = [];
 
   constructor(
     protected readonly logService: LogService,
     protected readonly teamService: TeamService,
+    protected readonly issueService: IssueService,
   ) {
     this.teams = this.teamService.getTeams();
   }
@@ -40,6 +43,26 @@ export abstract class TeamCommand implements CommandRunner {
           description.toLowerCase().includes(team.name.toLowerCase()),
         ).length > 0,
     );
+    return team;
+  }
+
+  protected getIssueTeam(issue: any): any {
+    let team: any;
+    if (issue.fields.customfield_10105) {
+      team = this.getTeamBySprint(issue.fields.customfield_10105);
+    }
+    if (!team && issue.fields.assignee?.emailAddress) {
+      team = this.getTeamByEmail(
+        issue.fields.assignee.emailAddress,
+        this.issueService.getResolutionDate(issue),
+      );
+      if (!team) {
+        this.logService.log(
+          'No team found for ' + issue.fields.assignee.emailAddress,
+        );
+        this.unidentifiedMails.push(issue.fields.assignee.emailAddress);
+      }
+    }
     return team;
   }
 

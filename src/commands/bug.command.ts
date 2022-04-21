@@ -5,6 +5,7 @@ import { TeamService } from '../services/team.service';
 import { StoryPointService } from 'src/services/story-point.service';
 import { TeamCommand } from './team.command';
 import { BugRecord } from 'src/models/bug-record.model';
+import { IssueService } from 'src/services/issue.service';
 
 @Command({ name: 'bug', description: 'Get bugs and defects stats' })
 export class BugCommand extends TeamCommand {
@@ -12,9 +13,10 @@ export class BugCommand extends TeamCommand {
     protected readonly logService: LogService,
     protected readonly jiraService: JiraService,
     protected readonly teamService: TeamService,
+    protected readonly issueService: IssueService,
     protected readonly storyPointService: StoryPointService,
   ) {
-    super(logService, teamService);
+    super(logService, teamService, issueService);
     this.prefix = 'bugs';
   }
 
@@ -50,21 +52,7 @@ export class BugCommand extends TeamCommand {
       total = tasks?.total;
       this.logService.log(`Total: ${total}`);
       for (const issue of tasks.issues) {
-        const date = issue.fields.updated
-          ? new Date(issue.fields.updated)
-          : new Date(issue.fields.created);
-        let team: any;
-        if (issue.fields.customfield_10105) {
-          team = this.getTeamBySprint(issue.fields.customfield_10105);
-        }
-        if (!team && issue.fields.assignee?.emailAddress) {
-          team = this.getTeamByEmail(issue.fields.assignee.emailAddress, date);
-          if (!team) {
-            this.logService.log(
-              'No team found for ' + issue.fields.assignee.emailAddress,
-            );
-          }
-        }
+        const team = this.getIssueTeam(issue);
         if (!team) continue;
         const solver = team.members.find(
           (member: { email: string }) =>

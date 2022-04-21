@@ -1,6 +1,7 @@
 import { Command } from 'nest-commander';
 import { JiraService } from '../services/jira.service';
 import { LogService } from '../services/log.service';
+import { IssueService } from 'src/services/issue.service';
 import { Record } from '../models/record.model';
 import { TeamService } from '../services/team.service';
 import { StoryPointService } from 'src/services/story-point.service';
@@ -12,9 +13,10 @@ export class RatioCommand extends TeamCommand {
     protected readonly logService: LogService,
     protected readonly jiraService: JiraService,
     protected readonly teamService: TeamService,
+    protected readonly issueService: IssueService,
     protected readonly storyPointService: StoryPointService,
   ) {
-    super(logService, teamService);
+    super(logService, teamService, issueService);
   }
 
   protected async getIssues(passedParam: string[]) {
@@ -40,17 +42,7 @@ export class RatioCommand extends TeamCommand {
       this.logService.log(tasks.startAt);
       for (const issue of tasks.issues) {
         let epic = {} as any;
-        const date = issue.fields.updated
-          ? new Date(issue.fields.updated)
-          : new Date(issue.fields.created);
-        this.logService.log(date);
-        let team: any;
-        if (issue.fields.customfield_10105) {
-          team = this.getTeamBySprint(issue.fields.customfield_10105);
-        }
-        if (!team && issue.fields.assignee?.emailAddress) {
-          team = this.getTeamByEmail(issue.fields.assignee.emailAddress, date);
-        }
+        const team = this.getIssueTeam(issue);
         if (!team) continue;
         this.logService.log(team.name);
         if (!issue.fields.customfield_10106) continue;

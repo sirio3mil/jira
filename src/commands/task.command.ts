@@ -7,10 +7,10 @@ import { TeamCommand } from './team.command';
 import { Stat } from 'src/models/stat.model';
 import { StatRecord } from 'src/models/stat-record.model';
 import * as fs from 'fs';
+import { IssueService } from 'src/services/issue.service';
 
 @Command({ name: 'task', description: 'Get bugs and defects stats' })
 export class TaskCommand extends TeamCommand {
-  unidentifiedMails: string[] = [];
   ignoredTasks: string[] = [];
   defaultStartDate = 'startOfMonth()';
   defaultEndDate = 'endOfMonth()';
@@ -19,9 +19,10 @@ export class TaskCommand extends TeamCommand {
     protected readonly logService: LogService,
     protected readonly jiraService: JiraService,
     protected readonly teamService: TeamService,
+    protected readonly issueService: IssueService,
     protected readonly storyPointService: StoryPointService,
   ) {
-    super(logService, teamService);
+    super(logService, teamService, issueService);
     this.prefix = 'tasks';
   }
 
@@ -120,23 +121,7 @@ export class TaskCommand extends TeamCommand {
           this.ignoredTasks.push(issue.key);
           continue;
         }
-        const date = issue.fields.updated
-          ? new Date(issue.fields.updated)
-          : new Date(issue.fields.created);
-        let team: any;
-        if (issue.fields.customfield_10105) {
-          team = this.getTeamBySprint(issue.fields.customfield_10105);
-        }
-        if (!team && issue.fields.assignee?.emailAddress) {
-          team = this.getTeamByEmail(issue.fields.assignee.emailAddress, date);
-          if (!team) {
-            this.logService.log(
-              'No team found for ' + issue.fields.assignee.emailAddress,
-            );
-            //this.ignoredTasks.push(issue.key);
-            this.unidentifiedMails.push(issue.fields.assignee.emailAddress);
-          }
-        }
+        const team = this.getIssueTeam(issue);
         if (!team) continue;
         if (!stories[team.name]) {
           stories[team.name] = { timeSpent: 0, total: 0 } as Stat;
@@ -173,23 +158,7 @@ export class TaskCommand extends TeamCommand {
           this.ignoredTasks.push(issue.key);
           continue;
         }
-        const date = issue.fields.updated
-          ? new Date(issue.fields.updated)
-          : new Date(issue.fields.created);
-        let team: any;
-        if (issue.fields.customfield_10105) {
-          team = this.getTeamBySprint(issue.fields.customfield_10105);
-        }
-        if (!team && issue.fields.assignee?.emailAddress) {
-          team = this.getTeamByEmail(issue.fields.assignee.emailAddress, date);
-          if (!team) {
-            this.logService.log(
-              'No team found for ' + issue.fields.assignee.emailAddress,
-            );
-            this.unidentifiedMails.push(issue.fields.assignee.emailAddress);
-            //this.ignoredTasks.push(issue.key);
-          }
-        }
+        const team = this.getIssueTeam(issue);
         if (!team) continue;
         if (!bugs[team.name]) {
           bugs[team.name] = { timeSpent: 0, total: 0 } as Stat;
