@@ -4,6 +4,7 @@ import stacks from '../config/teams.json';
 
 @Injectable()
 export class TeamService {
+  emails: string[] = [];
   codes = {
     tl: () => 1000,
     senior: () => 100,
@@ -20,6 +21,10 @@ export class TeamService {
     return months <= 0 ? 0 : months;
   }
 
+  getEmails(): string[] {
+    return [...new Set(this.emails)];
+  }
+
   getTeams(): Team[] {
     const teams: Team[] = [];
     stacks.teams.forEach((team) => {
@@ -32,6 +37,7 @@ export class TeamService {
         const seniorityDate = new Date(member.seniorityDate);
         const months = this.monthDiff(seniorityDate);
         seniority += months;
+        this.emails.push(member.email);
         return {
           name: member.name,
           email: member.email,

@@ -70,6 +70,13 @@ export class BugCommand extends TeamCommand {
             );
           }
         }
+        const timeToFix = this.issueService.getDevelopmentTime(
+          issue,
+          this.emails,
+        );
+        const timeSpent = sourceIssue
+          ? this.issueService.getDevelopmentTime(sourceIssue, this.emails)
+          : null;
         records.push({
           team: team.name,
           projectName: issue.fields.project.name,
@@ -77,7 +84,7 @@ export class BugCommand extends TeamCommand {
           summary: issue.fields.summary,
           issueType: issue.fields.issuetype.name,
           status: issue.fields.status.name,
-          timeToFix: issue.fields.aggregatetimespent || null,
+          timeToFix,
           created: issue.fields.created,
           updated: issue.fields.updated,
           solver: issue.fields.assignee.emailAddress,
@@ -85,7 +92,7 @@ export class BugCommand extends TeamCommand {
           solverSeniority: solver.seniority,
           causedByKey: sourceIssue?.key,
           causedBySummary: sourceIssue?.fields?.summary,
-          timeSpent: sourceIssue?.fields.aggregatetimespent || null,
+          timeSpent,
           assigned: sourceIssue?.fields.assignee.emailAddress,
           assignedSalary: assigned?.salary,
           assignedSeniority: assigned?.seniority,

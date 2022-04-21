@@ -108,7 +108,10 @@ export class TaskCommand extends TeamCommand {
           stories[team.name] = { timeSpent: 0, total: 0 } as Stat;
         }
         stories[team.name].total++;
-        stories[team.name].timeSpent += issue.fields.aggregatetimespent;
+        stories[team.name].timeSpent += this.issueService.getDevelopmentTime(
+          issue,
+          this.emails,
+        );
       }
       startAt += maxResults;
     } while (total && startAt < total);
@@ -145,7 +148,10 @@ export class TaskCommand extends TeamCommand {
           bugs[team.name] = { timeSpent: 0, total: 0 } as Stat;
         }
         bugs[team.name].total++;
-        bugs[team.name].timeSpent += issue.fields.aggregatetimespent;
+        bugs[team.name].timeSpent += this.issueService.getDevelopmentTime(
+          issue,
+          this.emails,
+        );
       }
       startAt += maxResults;
     } while (total && startAt < total);

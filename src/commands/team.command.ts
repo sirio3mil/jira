@@ -9,6 +9,7 @@ import * as fs from 'fs';
 
 export abstract class TeamCommand implements CommandRunner {
   teams: Team[] = [];
+  emails: string[] = [];
   prefix = 'issues';
   folder = 'files';
   unidentifiedMails: string[] = [];
@@ -19,6 +20,7 @@ export abstract class TeamCommand implements CommandRunner {
     protected readonly issueService: IssueService,
   ) {
     this.teams = this.teamService.getTeams();
+    this.emails = this.teamService.getEmails();
   }
 
   protected getTeamByEmail(email: string, date: Date): any {

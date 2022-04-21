@@ -47,9 +47,13 @@ export class RatioCommand extends TeamCommand {
         this.logService.log(team.name);
         if (!issue.fields.customfield_10106) continue;
         if (!issue.fields.aggregatetimespent) continue;
+        const developmentTime = this.issueService.getDevelopmentTime(
+          issue,
+          this.emails,
+        );
         const timeEstimate = this.storyPointService.toSeconds(
           issue.fields.customfield_10106,
-          issue.fields.aggregatetimespent,
+          developmentTime,
         );
         if (!timeEstimate) continue;
         if (!!issue.fields.customfield_10101) {
@@ -82,11 +86,11 @@ export class RatioCommand extends TeamCommand {
           summary: issue.fields.summary,
           issueType: issue.fields.issuetype.name,
           projectName: issue.fields.project.name,
-          aggregateTimeSpent: issue.fields.aggregatetimespent,
+          aggregateTimeSpent: developmentTime,
           timeEstimate,
           created: issue.fields.created,
           updated: issue.fields.updated,
-          emailAddress: issue.fields.assignee.emailAddress,
+          emailAddress: issue.fields.assignee?.emailAddress,
           status: issue.fields.status.name,
           epicKey: issue.fields.customfield_10101,
           epicSummary: epic?.fields?.summary,
