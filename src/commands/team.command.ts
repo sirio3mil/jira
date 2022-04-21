@@ -5,6 +5,7 @@ import { createFile } from '../storage.helper';
 import { TeamService } from '../services/team.service';
 import { Team } from '../models/team.model';
 import { IssueService } from 'src/services/issue.service';
+import * as fs from 'fs';
 
 export abstract class TeamCommand implements CommandRunner {
   teams: Team[] = [];
@@ -64,6 +65,25 @@ export abstract class TeamCommand implements CommandRunner {
       }
     }
     return team;
+  }
+
+  protected logUnidentifiedMails() {
+    if (this.unidentifiedMails.length) {
+      const unique = [...new Set(this.unidentifiedMails)];
+      const dateFileName = new Date().toISOString().replace(/[-:.]/g, '');
+
+      const filePath = this.folder;
+      const fileName = `unidentified-mails-${dateFileName}.csv`;
+
+      const file = fs.createWriteStream(`${filePath}/${fileName}`);
+      file.on('error', function (err) {
+        this.logService.log(err);
+      });
+      unique.forEach(function (item) {
+        file.write(item + '\n');
+      });
+      file.end();
+    }
   }
 
   protected getSourceIssue(issueLinks: any[]): string | null {
