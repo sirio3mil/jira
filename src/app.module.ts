@@ -10,6 +10,9 @@ import { StoryPointService } from './services/story-point.service';
 import { BugCommand } from './commands/bug.command';
 import { TaskCommand } from './commands/task.command';
 import { IssueService } from './services/issue.service';
+import { SprintService } from './services/sprint.service';
+import { BoardService } from './services/board.service';
+import { SprintCommand } from './commands/sprint.command';
 
 @Module({
   imports: [
@@ -27,14 +30,17 @@ import { IssueService } from './services/issue.service';
     }),
   ],
   providers: [
-    LogService, 
     RatioCommand, 
     BugCommand, 
     TaskCommand,
+    SprintCommand,
+    LogService, 
     JiraService, 
     TeamService, 
     IssueService,
-    StoryPointService
+    StoryPointService,
+    SprintService,
+    BoardService
   ],
 })
 export class AppModule {}

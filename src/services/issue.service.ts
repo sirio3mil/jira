@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import { Sprint } from 'src/models/sprint.model';
 
 @Injectable()
 export class IssueService {
+  readonly SPRINT = 'Sprint';
+  readonly FINISHED = '10125';
+  readonly STATUS = 'status';
+
   getResolutionDate(issue: any): Date {
     if (issue.fields.resolutiondate) {
       return new Date(issue.fields.resolutiondate);
@@ -36,5 +41,22 @@ export class IssueService {
       }
     }
     return aggregateTimeSpent;
+  }
+
+  getSprintIssueType(sprint: Sprint, issue: any): string {
+    const histories = issue.changelog?.histories || [];
+    for (const history of histories) {
+      if (history.items) {
+        for (const item of history.items) {
+          if (item.field === this.SPRINT) {
+            return item.toString;
+          }
+          if (item.field === this.STATUS && item.to === this.FINISHED) {
+            return item.toString;
+          }
+        }
+      }
+    }
+    return '';
   }
 }
