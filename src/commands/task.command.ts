@@ -9,7 +9,7 @@ import { StatRecord } from 'src/models/stat-record.model';
 import * as fs from 'fs';
 import { IssueService } from 'src/services/issue.service';
 
-@Command({ name: 'task', description: 'Get bugs and defects stats' })
+@Command({ name: 'task', description: 'Get tasks vs bugs and defects stats' })
 export class TaskCommand extends TeamCommand {
   ignoredTasks: string[] = [];
   defaultStartDate = 'startOfMonth()';

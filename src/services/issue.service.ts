@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
+import { SprintIssue } from 'src/models/sprint-issue.model';
 import { Sprint } from 'src/models/sprint.model';
 
 @Injectable()
 export class IssueService {
   readonly SPRINT = 'Sprint';
-  readonly FINISHED = '10125';
+  readonly FINISHED = 10125;
+  readonly ERROR = 10004;
+  readonly DEFECT = 10100;
   readonly STATUS = 'status';
 
   getResolutionDate(issue: any): Date {
@@ -43,23 +46,38 @@ export class IssueService {
     return aggregateTimeSpent;
   }
 
-  getSprintIssueType(sprint: Sprint, issue: any): string {
+  getSprintIssue(sprint: Sprint, issue: any): SprintIssue {
     const histories = issue.changelog?.histories || [];
-    // todo - check if the issue is in the sprint
-    // todo - check if the issue was added to the sprint
-    // todo - check if the issue was removed from the sprint
+    let planned = false;
+    let finished = false;
+    let deleted = false;
     for (const history of histories) {
       if (history.items) {
+        const created = new Date(history.created);
         for (const item of history.items) {
           if (item.field === this.SPRINT) {
-            return item.toString;
+            const to: number = +item.to;
+            const from: number = +item.from;
+            if (to === sprint.id) {
+              planned = created <= sprint.activatedDate;
+            }
+            if (from === sprint.id) {
+              deleted = true;
+            }
           }
-          if (item.field === this.STATUS && item.to === this.FINISHED) {
-            return item.toString;
+          if (item.field === this.STATUS && +item.to === this.FINISHED) {
+            finished =
+              created <= sprint.completeDate && created >= sprint.activatedDate;
           }
         }
       }
     }
-    return '';
+    return {
+      storyPoints: issue.fields.customfield_10106,
+      planned,
+      finished,
+      deleted,
+      type: +issue.fields.issuetype.id,
+    };
   }
 }
