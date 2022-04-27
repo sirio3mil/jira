@@ -92,7 +92,7 @@ export class SprintCommand extends TeamCommand {
     for (const team of this.teams) {
       if (!team.boardID) continue;
       const sprints = await this.getLastsClosedSprints(team.boardID);
-      this.logService.log(`Sprints found: ${sprints.length}`);
+      this.logService.log(`Sprints filtered: ${sprints.length}`);
       for (const sprint of sprints) {
         const record: SprintRecord = {
           team: team.name,
