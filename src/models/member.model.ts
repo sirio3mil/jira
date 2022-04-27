@@ -1,10 +1,9 @@
+import { Interval } from './interval.model';
+
 export interface Member {
   name?: string;
   email?: string;
-  membershipIntervals?: {
-    start?: Date;
-    end?: Date;
-  }[];
+  membershipIntervals?: Interval[];
   seniorityDate: Date;
   active: boolean;
   role: string;

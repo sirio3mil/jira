@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Team } from '../models/team.model';
 import stacks from '../config/teams.json';
+import { Interval } from 'src/models/interval.model';
 
 @Injectable()
 export class TeamService {
@@ -31,7 +32,7 @@ export class TeamService {
       let seniority = 0;
       let salaries = 0;
       let code = 0;
-      const members = team.members.map((member) => {
+      const members = team.members.map((member: any) => {
         code += this.codes[member.role]();
         salaries += member.salary;
         const seniorityDate = new Date(member.seniorityDate);
@@ -41,12 +42,16 @@ export class TeamService {
         return {
           name: member.name,
           email: member.email,
-          membershipIntervals: member.membershipIntervals?.map((interval) => {
-            return {
-              start: interval?.start ? new Date(interval.start) : seniorityDate,
-              end: interval?.end ? new Date(interval.end) : new Date(),
-            };
-          }),
+          membershipIntervals: member.membershipIntervals?.map(
+            (interval: any) => {
+              return {
+                start: interval?.start
+                  ? new Date(interval.start)
+                  : seniorityDate,
+                end: interval?.end ? new Date(interval.end) : new Date(),
+              };
+            },
+          ),
           seniorityDate,
           active: !!member.active,
           role: member.role,
@@ -56,6 +61,7 @@ export class TeamService {
       });
       teams.push({
         name: team.name,
+        boardID: team.boardID,
         color: team.color || team.stack,
         seniority,
         salaries,
@@ -67,7 +73,8 @@ export class TeamService {
           const today = new Date();
           const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
           const interval = member.membershipIntervals?.find(
-            (interval) => today >= interval.start && firstDay <= interval.end,
+            (interval: Interval) =>
+              today >= interval.start && firstDay <= interval.end,
           );
           return !!interval;
         }),

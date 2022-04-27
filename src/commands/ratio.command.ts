@@ -44,7 +44,6 @@ export class RatioCommand extends TeamCommand {
         let epic = {} as any;
         const team = this.getIssueTeam(issue);
         if (!team) continue;
-        this.logService.log(team.name);
         if (!issue.fields.customfield_10106) continue;
         if (!issue.fields.aggregatetimespent) continue;
         const developmentTime = this.issueService.getDevelopmentTime(
@@ -63,7 +62,6 @@ export class RatioCommand extends TeamCommand {
             epic = await this.jiraService.findByKey(
               issue.fields.customfield_10101,
             );
-            this.logService.log(epic.fields?.summary);
             epics[issue.fields.customfield_10101] = epic;
           }
         }
