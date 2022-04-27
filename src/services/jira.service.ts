@@ -8,7 +8,7 @@ export class JiraService {
 
   async findAll(args: string): Promise<any> {
     const config = {
-      url: `/search?${args}`,
+      url: `/rest/api/2/search?${args}`,
     };
     return await lastValueFrom(
       this.httpService.get(config.url).pipe(
@@ -21,7 +21,7 @@ export class JiraService {
 
   async findByKey(key: string): Promise<any> {
     const config = {
-      url: `/issue/${key}?fields=*all&fieldsByKeys=false`,
+      url: `/rest/api/2/issue/${key}?fields=*all&fieldsByKeys=false`,
     };
     return await lastValueFrom(
       this.httpService.get(config.url).pipe(
