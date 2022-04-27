@@ -45,6 +45,9 @@ export class IssueService {
 
   getSprintIssueType(sprint: Sprint, issue: any): string {
     const histories = issue.changelog?.histories || [];
+    // todo - check if the issue is in the sprint
+    // todo - check if the issue was added to the sprint
+    // todo - check if the issue was removed from the sprint
     for (const history of histories) {
       if (history.items) {
         for (const item of history.items) {
