@@ -51,6 +51,7 @@ export class RatioCommand extends TeamCommand {
           issue,
           this.emails,
         );
+        if (developmentTime <= 0) continue;
         const timeEstimate = this.storyPointService.toSeconds(
           issue.fields.customfield_10106,
           developmentTime,
@@ -68,10 +69,8 @@ export class RatioCommand extends TeamCommand {
         }
         let sourceIssue: any;
         if (issue.fields.issuelinks?.length) {
-          this.logService.log(`Issue links: ${issue.fields.issuelinks.length}`);
           const sourceIssueKey = this.getSourceIssue(issue.fields.issuelinks);
           if (sourceIssueKey) {
-            this.logService.log(`Source Key: ${sourceIssueKey}`);
             sourceIssue = await this.jiraService.findByKey(sourceIssueKey);
             this.logService.log(sourceIssue.fields?.summary);
           }
