@@ -3,6 +3,7 @@
     "name": "",
     "stack": "",
     "color": "",
+    "boardID": 0,
     "members": [{
       "name": "",
       "email": "",
