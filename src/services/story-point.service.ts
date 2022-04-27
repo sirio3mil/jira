@@ -32,6 +32,14 @@ export class StoryPointService {
    */
   toSeconds(storyPoints: number, aggregateTimeSpent: number): number {
     if (storyPoints === 0.5) {
+      const halfHour = this.hoursToSeconds(0.5);
+      if (aggregateTimeSpent <= halfHour) {
+        return halfHour;
+      }
+      const oneHour = this.hoursToSeconds(1);
+      if (aggregateTimeSpent <= oneHour) {
+        return oneHour;
+      }
       return this.hoursToSeconds(2);
     }
     if (storyPoints === 1) {
