@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { SprintIssue } from 'src/models/sprint-issue.model';
 import { Sprint } from 'src/models/sprint.model';
+import { LogService } from './log.service';
 
 @Injectable()
 export class IssueService {
@@ -9,6 +10,7 @@ export class IssueService {
   readonly ERROR = 10004;
   readonly DEFECT = 10100;
   readonly STATUS = 'status';
+  constructor(protected readonly logService: LogService) {}
 
   getResolutionDate(issue: any): Date {
     if (issue.fields.resolutiondate) {
@@ -56,18 +58,29 @@ export class IssueService {
         const created = new Date(history.created);
         for (const item of history.items) {
           if (item.field === this.SPRINT) {
-            const to: number = +item.to;
-            const from: number = +item.from;
-            if (to === sprint.id) {
-              planned = created <= sprint.activatedDate;
-            }
-            if (from === sprint.id) {
+            const to: number[] = item.to?.split(',').map(Number) || [];
+            const from: number[] = item.from?.split(',').map(Number) || [];
+            if (to.includes(sprint.id)) {
+              this.logService.log(`To sprint: ${issue.key}`);
+              if (!planned) {
+                planned = created <= sprint.activatedDate;
+                this.logService.log(
+                  `Planned ${planned}: ${issue.key} ${issue.fields.customfield_10106}`,
+                );
+              }
+            } else if (from.includes(sprint.id)) {
               deleted = true;
+              this.logService.log(
+                `Deleted: ${issue.key} ${issue.fields.customfield_10106}`,
+              );
             }
           }
           if (item.field === this.STATUS && +item.to === this.FINISHED) {
             finished =
               created <= sprint.completeDate && created >= sprint.activatedDate;
+            this.logService.log(
+              `Finished ${finished}: ${issue.key} ${issue.fields.customfield_10106}`,
+            );
           }
         }
       }

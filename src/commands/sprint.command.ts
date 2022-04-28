@@ -10,6 +10,8 @@ import { SprintRecord } from 'src/models/sprint-record.model';
 
 @Command({ name: 'sprint', description: 'Get sprints stats' })
 export class SprintCommand extends TeamCommand {
+  sprintsByBoard = 1;
+
   constructor(
     protected readonly logService: LogService,
     protected readonly jiraService: JiraService,
@@ -62,7 +64,7 @@ export class SprintCommand extends TeamCommand {
     const orderedSprints = sprints.sort(
       (a, b) => b.endDate.getTime() - a.endDate.getTime(),
     );
-    return orderedSprints.slice(0, 2);
+    return orderedSprints.slice(0, this.sprintsByBoard);
   }
 
   protected async getSprintIssues(
@@ -91,6 +93,7 @@ export class SprintCommand extends TeamCommand {
     const records: SprintRecord[] = [];
     for (const team of this.teams) {
       if (!team.boardID) continue;
+      if (team.boardID !== 79) continue;
       const sprints = await this.getLastsClosedSprints(team.boardID);
       this.logService.log(`Sprints filtered: ${sprints.length}`);
       for (const sprint of sprints) {

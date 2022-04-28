@@ -25,7 +25,7 @@ export class SprintService {
     startAt = 0,
   ): Promise<any> {
     const config = {
-      url: `/rest/agile/1.0/board/${boardID}/sprint/${sprintID}/issue?expand=changelog&fields=changelog,id,key,issuetype,customfield_10106&startAt=${startAt}`,
+      url: `/rest/agile/1.0/board/${boardID}/sprint/${sprintID}/issue?expand=changelog&fields=changelog,id,key,issuetype,customfield_10106&startAt=${startAt}&jql=type in (standardIssueTypes())`,
     };
     return await lastValueFrom(
       this.httpService.get(config.url).pipe(
