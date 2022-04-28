@@ -62,7 +62,7 @@ export class SprintCommand extends TeamCommand {
   protected async getLastsClosedSprints(boardID: number): Promise<Sprint[]> {
     const sprints = await this.getBoardSprints(boardID);
     const orderedSprints = sprints.sort(
-      (a, b) => b.endDate.getTime() - a.endDate.getTime(),
+      (a, b) => b.startDate.getTime() - a.startDate.getTime(),
     );
     return orderedSprints.slice(0, this.sprintsByBoard);
   }
