@@ -69,10 +69,11 @@ export class IssueService {
                 );
               }
             } else if (from.includes(sprint.id)) {
-              deleted = true;
-              this.logService.log(
-                `Deleted: ${issue.key} ${issue.fields.customfield_10106}`,
-              );
+              if (created <= sprint.activatedDate) {
+                planned = false;
+              } else {
+                deleted = true;
+              }
             }
           }
           if (item.field === this.STATUS && +item.to === this.FINISHED) {
