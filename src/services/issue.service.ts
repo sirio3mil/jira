@@ -7,6 +7,8 @@ import { LogService } from './log.service';
 export class IssueService {
   readonly SPRINT = 'Sprint';
   readonly FINISHED = 10125;
+  readonly TESTED = 10218;
+  readonly UAT = 11000;
   readonly ERROR = 10004;
   readonly DEFECT = 10100;
   readonly STATUS = 'status';
@@ -52,6 +54,8 @@ export class IssueService {
     const histories = issue.changelog?.histories || [];
     let planned = false;
     let finished = false;
+    let tested = false;
+    let uat = false;
     let deleted = false;
     for (const history of histories) {
       if (history.items) {
@@ -76,12 +80,30 @@ export class IssueService {
               }
             }
           }
-          if (item.field === this.STATUS && +item.to === this.FINISHED) {
-            finished =
-              created <= sprint.completeDate && created >= sprint.activatedDate;
-            this.logService.log(
-              `Finished ${finished}: ${issue.key} ${issue.fields.customfield_10106}`,
-            );
+          if (item.field === this.STATUS) {
+            const to = +item.to;
+            if (to === this.FINISHED) {
+              finished =
+                created <= sprint.completeDate &&
+                created >= sprint.activatedDate;
+              this.logService.log(
+                `Finished ${finished}: ${issue.key} ${issue.fields.customfield_10106}`,
+              );
+            } else if (to === this.TESTED) {
+              tested =
+                created <= sprint.completeDate &&
+                created >= sprint.activatedDate;
+              this.logService.log(
+                `Finished ${tested}: ${issue.key} ${issue.fields.customfield_10106}`,
+              );
+            } else if (to === this.UAT) {
+              uat =
+                created <= sprint.completeDate &&
+                created >= sprint.activatedDate;
+              this.logService.log(
+                `Finished ${uat}: ${issue.key} ${issue.fields.customfield_10106}`,
+              );
+            }
           }
         }
       }
@@ -90,6 +112,8 @@ export class IssueService {
       storyPoints: issue.fields.customfield_10106,
       planned,
       finished,
+      tested,
+      uat,
       deleted,
       type: +issue.fields.issuetype.id,
     };

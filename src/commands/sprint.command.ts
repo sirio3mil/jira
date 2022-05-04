@@ -103,10 +103,14 @@ export class SprintCommand extends TeamCommand {
           end: sprint.endDate,
           planned: 0,
           finished: 0,
+          tested: 0,
+          uat: 0,
           notPlanned: 0,
           bugs: 0,
           defects: 0,
-          deviation: 0,
+          deviationFinished: 0,
+          deviationTested: 0,
+          deviationUat: 0,
         };
         this.logService.log(`Sprint: ${sprint.name}`);
         const issues = await this.getSprintIssues(team.boardID, sprint.id);
@@ -119,6 +123,10 @@ export class SprintCommand extends TeamCommand {
           }
           if (sprintIssue.finished) {
             record.finished += sprintIssue.storyPoints;
+          } else if (sprintIssue.uat) {
+            record.uat += sprintIssue.storyPoints;
+          } else if (sprintIssue.tested) {
+            record.tested += sprintIssue.storyPoints;
           }
           if (sprintIssue.type === this.issueService.ERROR) {
             record.bugs++;
@@ -127,7 +135,12 @@ export class SprintCommand extends TeamCommand {
             record.defects++;
           }
         }
-        record.deviation = record.planned + record.notPlanned - record.finished;
+        const total = record.planned + record.notPlanned;
+        const uat = record.uat + record.finished;
+        const tested = record.tested + record.uat + record.finished;
+        record.deviationFinished = total - record.finished;
+        record.deviationUat = total - uat;
+        record.deviationTested = total - tested;
         records.push(record);
       }
     }
