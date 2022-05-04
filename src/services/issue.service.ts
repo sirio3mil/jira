@@ -94,14 +94,14 @@ export class IssueService {
                 created <= sprint.completeDate &&
                 created >= sprint.activatedDate;
               this.logService.log(
-                `Finished ${tested}: ${issue.key} ${issue.fields.customfield_10106}`,
+                `Tested ${tested}: ${issue.key} ${issue.fields.customfield_10106}`,
               );
             } else if (to === this.UAT) {
               uat =
                 created <= sprint.completeDate &&
                 created >= sprint.activatedDate;
               this.logService.log(
-                `Finished ${uat}: ${issue.key} ${issue.fields.customfield_10106}`,
+                `UAT ${uat}: ${issue.key} ${issue.fields.customfield_10106}`,
               );
             }
           }
