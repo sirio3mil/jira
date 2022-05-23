@@ -14,6 +14,8 @@ import { SprintService } from './services/sprint.service';
 import { BoardService } from './services/board.service';
 import { SprintCommand } from './commands/sprint.command';
 import mysql from 'mysql2';
+import { JiraRepository } from './repositories/JiraRepository';
+import { SubtaskCommand } from './commands/subtask.command';
 
 const connectionFactory = {
   provide: "CONNECTION",
@@ -49,6 +51,7 @@ const connectionFactory = {
     BugCommand, 
     TaskCommand,
     SprintCommand,
+    SubtaskCommand,
     LogService, 
     JiraService, 
     TeamService, 
@@ -56,6 +59,7 @@ const connectionFactory = {
     StoryPointService,
     SprintService,
     BoardService,
+    JiraRepository,
     connectionFactory,
   ],
   exports: ["CONNECTION"],

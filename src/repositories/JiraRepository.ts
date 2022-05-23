@@ -9,7 +9,7 @@ export class JiraRepository {
     this.connection = connection;
   }
 
-  async selectAll(): Promise<any> {
+  async getPairProgrammingSubtasks(): Promise<any> {
     return new Promise((res) => {
       const query = `SELECT w.issueID,
           w.author,
