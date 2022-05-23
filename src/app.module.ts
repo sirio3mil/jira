@@ -13,6 +13,21 @@ import { IssueService } from './services/issue.service';
 import { SprintService } from './services/sprint.service';
 import { BoardService } from './services/board.service';
 import { SprintCommand } from './commands/sprint.command';
+import mysql from 'mysql2';
+
+const connectionFactory = {
+  provide: "CONNECTION",
+  useFactory: async (configService: ConfigService) => {
+    return mysql.createConnection({
+      host: configService.get('JIRA_MYSQL_HOST'),
+      user: configService.get('JIRA_MYSQL_USER'),
+      password: configService.get('JIRA_MYSQL_PASSWORD'),
+      database: configService.get('JIRA_MYSQL_DB'),
+      port: configService.get('JIRA_MYSQL_PORT'),
+    });
+  },
+  inject: [ConfigService],
+};
 
 @Module({
   imports: [
@@ -40,7 +55,9 @@ import { SprintCommand } from './commands/sprint.command';
     IssueService,
     StoryPointService,
     SprintService,
-    BoardService
+    BoardService,
+    connectionFactory,
   ],
+  exports: ["CONNECTION"],
 })
 export class AppModule {}
