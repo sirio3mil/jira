@@ -9,14 +9,22 @@ export class JiraRepository {
     this.connection = connection;
   }
 
-  async getPairProgrammingSubtasks(): Promise<any> {
+  async getPairProgrammingSubtasks(
+    project: number,
+    date: string,
+  ): Promise<any> {
     return new Promise((res) => {
       const query = `SELECT w.issueID,
-          w.author,
+          u.lower_user_name author,
+          a.lower_user_name assignee,
+          concat(p.pkey, '-', i.issuenum) pkey,
           f.finished,
           sum(w.timeworked) timeworked
         FROM worklog w
         INNER JOIN jiraissue i ON i.ID = w.issueID
+        INNER JOIN app_user u ON u.user_key = w.author
+        INNER JOIN project p ON p.ID = i.PROJECT
+        LEFT JOIN app_user a ON a.user_key = assignee
         INNER JOIN
         (SELECT g.issueid,
           max(g.created) finished
@@ -25,24 +33,69 @@ export class JiraRepository {
           WHERE i.field = 'status'
             AND i.newvalue = 10125
           GROUP BY g.issueid) f ON f.issueid = w.issueid
-        WHERE i.PROJECT = 11001
+        WHERE i.PROJECT = ${project}
         AND i.issuetype = 10003
-        AND i.created >= 2022-04-01
+        AND i.created >= ${date}
         AND i.issuestatus = 10125
         AND w.issueID in
           (SELECT w.issueID
             FROM worklog w
             INNER JOIN jiraissue i ON i.ID = w.issueID
-            WHERE i.PROJECT = 11001
+            WHERE i.PROJECT = ${project}
               AND i.issuetype = 10003
-              AND i.created >= 2022-04-01
+              AND i.created >= ${date}
               AND i.issuestatus = 10125
             GROUP BY w.issueID
             HAVING count(DISTINCT w.author) > 1)
         GROUP BY w.issueID ,
-                w.author ,
+                u.lower_user_name,
+                a.lower_user_name,
                 f.finished
-        ORDER BY issueID`;
+        ORDER BY issueID, timeworked desc`;
+      this.connection.execute(query, (e, rows) => {
+        if (e) throw e;
+        res(rows);
+      });
+    });
+  }
+
+  async getSingleUSerSubtasks(project: number, date: string): Promise<any> {
+    return new Promise((res) => {
+      const query = `SELECT w.issueID,
+          u.lower_user_name author,
+          f.finished,
+          concat(p.pkey, '-', i.issuenum) pkey,
+          sum(w.timeworked) timeworked
+        FROM worklog w
+        INNER JOIN jiraissue i ON i.ID = w.issueID
+        INNER JOIN app_user u ON u.user_key = w.author
+        INNER JOIN project p ON p.ID = i.PROJECT
+        INNER JOIN
+        (SELECT g.issueid,
+          max(g.created) finished
+          FROM changeitem i
+          INNER JOIN changegroup g ON g.id = i.groupid
+          WHERE i.field = 'status'
+            AND i.newvalue = 10125
+          GROUP BY g.issueid) f ON f.issueid = w.issueid
+        WHERE i.PROJECT = ${project}
+        AND i.issuetype = 10003
+        AND i.created >= ${date}
+        AND i.issuestatus = 10125
+        AND w.issueID in
+          (SELECT w.issueID
+            FROM worklog w
+            INNER JOIN jiraissue i ON i.ID = w.issueID
+            WHERE i.PROJECT = ${project}
+              AND i.issuetype = 10003
+              AND i.created >= ${date}
+              AND i.issuestatus = 10125
+            GROUP BY w.issueID
+            HAVING count(DISTINCT w.author) = 1)
+        GROUP BY w.issueID ,
+                u.lower_user_name,
+                f.finished
+        ORDER BY issueID, timeworked desc`;
       this.connection.execute(query, (e, rows) => {
         if (e) throw e;
         res(rows);
