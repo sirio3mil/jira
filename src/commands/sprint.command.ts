@@ -28,8 +28,9 @@ export class SprintCommand extends TeamCommand {
     let sprints: Sprint[] = [];
     let startAt = 0;
     do {
-      const response = await this.sprintService.getClosedSprintsByBoardID(
+      const response = await this.sprintService.getSprintsByBoardID(
         boardID,
+        SprintService.STATUS_CLOSED,
         startAt,
       );
       lastPage = response.isLast;

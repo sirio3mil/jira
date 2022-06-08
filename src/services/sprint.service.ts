@@ -4,11 +4,19 @@ import { lastValueFrom, map } from 'rxjs';
 
 @Injectable()
 export class SprintService {
+  static STATUS_ACTIVE = 'active';
+  static STATUS_CLOSED = 'closed';
+  static STATUS_FUTURE = 'future';
+
   constructor(private httpService: HttpService) {}
 
-  async getClosedSprintsByBoardID(boardID: number, startAt = 0): Promise<any> {
+  async getSprintsByBoardID(
+    boardID: number,
+    status: string,
+    startAt = 0,
+  ): Promise<any> {
     const config = {
-      url: `/rest/agile/1.0/board/${boardID}/sprint?startAt=${startAt}&state=closed`,
+      url: `/rest/agile/1.0/board/${boardID}/sprint?startAt=${startAt}&state=${status}`,
     };
     return await lastValueFrom(
       this.httpService.get(config.url).pipe(
