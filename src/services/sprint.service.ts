@@ -4,9 +4,9 @@ import { lastValueFrom, map } from 'rxjs';
 
 @Injectable()
 export class SprintService {
-  static STATUS_ACTIVE = 'active';
-  static STATUS_CLOSED = 'closed';
-  static STATUS_FUTURE = 'future';
+  static readonly STATUS_ACTIVE = 'active';
+  static readonly STATUS_CLOSED = 'closed';
+  static readonly STATUS_FUTURE = 'future';
 
   constructor(private httpService: HttpService) {}
 
