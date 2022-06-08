@@ -16,6 +16,7 @@ import { SprintCommand } from './commands/sprint.command';
 import mysql from 'mysql2';
 import { JiraRepository } from './repositories/JiraRepository';
 import { SubtaskCommand } from './commands/subtask.command';
+import { GoalCommand } from './commands/goal.command';
 
 const connectionFactory = {
   provide: "CONNECTION",
@@ -49,6 +50,7 @@ const connectionFactory = {
   providers: [
     RatioCommand, 
     BugCommand, 
+    GoalCommand,
     TaskCommand,
     SprintCommand,
     SubtaskCommand,
