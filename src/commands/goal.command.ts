@@ -142,6 +142,7 @@ export class GoalCommand extends TeamCommand {
         for (const issue of issues) {
           this.issues.push({
             team: team.name,
+            stack: team.stack,
             sprint: sprint.name,
             key: issue.key,
             summary: issue.fields.summary,
@@ -152,6 +153,7 @@ export class GoalCommand extends TeamCommand {
               ? issue.fields.assignee.displayName
               : '',
             storyPoints: issue.fields.customfield_10106,
+            dueDate: sprint.endDate,
           });
           const sprintIssue = this.issueService.getSprintIssue(sprint, issue);
           if (sprintIssue.planned) {

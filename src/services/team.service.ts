@@ -61,6 +61,7 @@ export class TeamService {
       });
       teams.push({
         name: team.name,
+        stack: team.stack,
         boardID: team.boardID,
         color: team.color || team.stack,
         seniority,
