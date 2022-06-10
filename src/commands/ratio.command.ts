@@ -34,7 +34,7 @@ export class RatioCommand extends TeamCommand {
         ? passedParam[1]
         : 'endOfMonth()';
     do {
-      const jql = `jql=status = Terminado AND created >= ${startDate} AND created <= ${endDate} AND type in (standardIssueTypes()) and project not in ("Service Desk Pruebas") ORDER BY priority DESC, updated DESC&startAt=${startAt}&maxResults=${maxResults}&fields=*all`;
+      const jql = `jql=status changed TO Terminado DURING (${startDate},${endDate}) AND type in (standardIssueTypes()) and project not in ("Service Desk Pruebas") ORDER BY priority DESC, updated DESC&startAt=${startAt}&maxResults=${maxResults}&fields=*all`;
       this.logService.log(jql);
       const tasks = await this.jiraService.findAll(jql);
       total = tasks?.total;
@@ -99,6 +99,7 @@ export class RatioCommand extends TeamCommand {
       startAt += maxResults;
     } while (total && startAt < total);
     this.logService.log(records.length);
+    this.logUnidentifiedMails();
     return records;
   }
 }
