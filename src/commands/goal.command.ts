@@ -123,7 +123,7 @@ export class GoalCommand extends TeamCommand {
       const sprints = await this.getSprints(team.boardID);
       this.logService.log(`Sprints filtered: ${sprints.length}`);
       for (const sprint of sprints) {
-        const week = dayjs(sprint.endDate).week();
+        const week = dayjs(sprint.endDate).week() - 1;
         const record: SprintRecord = {
           team: team.name,
           stack: team.stack,
