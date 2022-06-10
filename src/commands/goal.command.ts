@@ -8,6 +8,7 @@ import { SprintService } from 'src/services/sprint.service';
 import { Sprint } from 'src/models/sprint.model';
 import { SprintRecord } from 'src/models/sprint-record.model';
 import dayjs from 'dayjs';
+import weekOfYear from 'dayjs/plugin/weekOfYear';
 import { createFile } from '../storage.helper';
 import { parse } from 'json2csv';
 import { GoalDetail } from 'src/models/goal-detail.model';
@@ -25,6 +26,7 @@ export class GoalCommand extends TeamCommand {
   ) {
     super(logService, teamService, issueService);
     this.prefix = 'goals';
+    dayjs.extend(weekOfYear);
   }
 
   protected async getBoardSprints(
@@ -121,9 +123,12 @@ export class GoalCommand extends TeamCommand {
       const sprints = await this.getSprints(team.boardID);
       this.logService.log(`Sprints filtered: ${sprints.length}`);
       for (const sprint of sprints) {
+        const week = dayjs(sprint.endDate).week();
         const record: SprintRecord = {
           team: team.name,
-          week: sprint.name,
+          stack: team.stack,
+          week,
+          sprint: sprint.name,
           start: sprint.startDate,
           end: sprint.endDate,
           planned: 0,
@@ -134,8 +139,8 @@ export class GoalCommand extends TeamCommand {
           bugs: 0,
           defects: 0,
           deviationFinished: 0,
-          deviationTested: 0,
           deviationUat: 0,
+          deviationTested: 0,
         };
         this.logService.log(`Sprint: ${sprint.name}`);
         const issues = await this.getSprintIssues(team.boardID, sprint.id);
@@ -143,6 +148,7 @@ export class GoalCommand extends TeamCommand {
           this.issues.push({
             team: team.name,
             stack: team.stack,
+            week,
             sprint: sprint.name,
             key: issue.key,
             summary: issue.fields.summary,

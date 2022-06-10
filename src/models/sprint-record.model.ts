@@ -1,6 +1,8 @@
 export interface SprintRecord {
   team: string;
-  week: string;
+  stack: string;
+  week: number;
+  sprint: string;
   start: Date;
   end: Date;
   planned: number;

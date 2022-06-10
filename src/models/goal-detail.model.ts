@@ -1,6 +1,7 @@
 export interface GoalDetail {
   team: string;
   stack: string;
+  week: number;
   sprint: string;
   key: string;
   summary: string;
