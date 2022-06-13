@@ -16,6 +16,8 @@ import { GoalDetail } from 'src/models/goal-detail.model';
 @Command({ name: 'goal', description: 'Get weekly goals' })
 export class GoalCommand extends TeamCommand {
   issues: GoalDetail[] = [];
+  date: dayjs.Dayjs;
+  week: number;
 
   constructor(
     protected readonly logService: LogService,
@@ -26,6 +28,8 @@ export class GoalCommand extends TeamCommand {
   ) {
     super(logService, teamService, issueService);
     this.prefix = 'goals';
+    this.date = dayjs('2022-06-10');
+    this.week = this.date.week() - 1;
     dayjs.extend(weekOfYear);
   }
 
@@ -50,7 +54,7 @@ export class GoalCommand extends TeamCommand {
       sprints = sprints.concat(
         response.values
           .filter((sprint: any) => {
-            return dayjs().isSame(sprint.endDate, 'week');
+            return this.date.isSame(sprint.endDate, 'week');
           })
           .map((sprint: any) => {
             return {
@@ -123,11 +127,10 @@ export class GoalCommand extends TeamCommand {
       const sprints = await this.getSprints(team.boardID);
       this.logService.log(`Sprints filtered: ${sprints.length}`);
       for (const sprint of sprints) {
-        const week = dayjs(sprint.endDate).week() - 1;
         const record: SprintRecord = {
           team: team.name,
           stack: team.stack,
-          week,
+          week: this.week,
           sprint: sprint.name,
           start: sprint.startDate,
           end: sprint.endDate,
@@ -148,7 +151,7 @@ export class GoalCommand extends TeamCommand {
           this.issues.push({
             team: team.name,
             stack: team.stack,
-            week,
+            week: this.week,
             sprint: sprint.name,
             key: issue.key,
             summary: issue.fields.summary,
