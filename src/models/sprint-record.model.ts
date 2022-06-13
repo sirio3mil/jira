@@ -6,13 +6,13 @@ export interface SprintRecord {
   start: Date;
   end: Date;
   planned: number;
-  finished: number;
-  tested: number;
-  uat: number;
   notPlanned: number;
+  finished: number;
+  uat: number;
+  tested: number;
+  deviationFinished: number;
+  deviationUat: number;
+  deviationTested: number;
   bugs: number;
   defects: number;
-  deviationFinished: number;
-  deviationTested: number;
-  deviationUat: number;
 }

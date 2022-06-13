@@ -30,7 +30,7 @@ export class GoalCommand extends TeamCommand {
     dayjs.extend(weekOfYear);
     this.prefix = 'goals';
     this.date = dayjs('2022-06-10');
-    this.week = this.date.week();
+    this.week = this.date.week() - 1;
   }
 
   protected async getBoardSprints(
@@ -135,15 +135,15 @@ export class GoalCommand extends TeamCommand {
           start: sprint.startDate,
           end: sprint.endDate,
           planned: 0,
-          finished: 0,
-          tested: 0,
-          uat: 0,
           notPlanned: 0,
-          bugs: 0,
-          defects: 0,
+          finished: 0,
+          uat: 0,
+          tested: 0,
           deviationFinished: 0,
           deviationUat: 0,
           deviationTested: 0,
+          bugs: 0,
+          defects: 0,
         };
         this.logService.log(`Sprint: ${sprint.name}`);
         const issues = await this.getSprintIssues(team.boardID, sprint.id);

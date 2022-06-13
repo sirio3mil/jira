@@ -8,6 +8,11 @@ export class IssueService {
   readonly SPRINT = 'Sprint';
   readonly FINISHED = 10125;
   readonly TESTED = 10218;
+  readonly READY_TEST = 10302;
+  readonly DEV = 10401;
+  readonly READY_DEV = 10213;
+  readonly PRE = 10216;
+  readonly READY_PRE = 10214;
   readonly UAT = 11000;
   readonly ERROR = 10004;
   readonly DEFECT = 10100;
@@ -89,14 +94,24 @@ export class IssueService {
               this.logService.log(
                 `Finished ${finished}: ${issue.key} ${issue.fields.customfield_10106}`,
               );
-            } else if (to === this.TESTED) {
+            } else if (
+              !tested &&
+              (to === this.TESTED || to === this.READY_TEST)
+            ) {
               tested =
                 created <= sprint.completeDate &&
                 created >= sprint.activatedDate;
               this.logService.log(
                 `Tested ${tested}: ${issue.key} ${issue.fields.customfield_10106}`,
               );
-            } else if (to === this.UAT) {
+            } else if (
+              !uat &&
+              (to === this.UAT ||
+                to === this.DEV ||
+                to === this.READY_DEV ||
+                to === this.PRE ||
+                to === this.READY_PRE)
+            ) {
               uat =
                 created <= sprint.completeDate &&
                 created >= sprint.activatedDate;
@@ -107,6 +122,12 @@ export class IssueService {
           }
         }
       }
+    }
+    if (finished) {
+      tested = false;
+      uat = false;
+    } else if (uat) {
+      tested = false;
     }
     return {
       storyPoints: issue.fields.customfield_10106,
