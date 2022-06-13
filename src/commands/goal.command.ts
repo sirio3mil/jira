@@ -16,8 +16,8 @@ import { GoalDetail } from 'src/models/goal-detail.model';
 @Command({ name: 'goal', description: 'Get weekly goals' })
 export class GoalCommand extends TeamCommand {
   issues: GoalDetail[] = [];
-  date: dayjs.Dayjs;
-  week: number;
+  protected date: dayjs.Dayjs;
+  protected week: number;
 
   constructor(
     protected readonly logService: LogService,
@@ -27,10 +27,10 @@ export class GoalCommand extends TeamCommand {
     protected readonly sprintService: SprintService,
   ) {
     super(logService, teamService, issueService);
+    dayjs.extend(weekOfYear);
     this.prefix = 'goals';
     this.date = dayjs('2022-06-10');
-    this.week = this.date.week() - 1;
-    dayjs.extend(weekOfYear);
+    this.week = this.date.week();
   }
 
   protected async getBoardSprints(
