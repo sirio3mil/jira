@@ -29,8 +29,6 @@ export class GoalCommand extends TeamCommand {
     super(logService, teamService, issueService);
     dayjs.extend(weekOfYear);
     this.prefix = 'goals';
-    this.date = dayjs('2022-06-10');
-    this.week = this.date.week() - 1;
   }
 
   protected async getBoardSprints(
@@ -120,7 +118,12 @@ export class GoalCommand extends TeamCommand {
     return issues;
   }
 
-  protected async getIssues() {
+  protected async getIssues(passedParam: string[]) {
+    this.date =
+      !!passedParam[0] && !isNaN(Date.parse(passedParam[0]))
+        ? dayjs(passedParam[0])
+        : dayjs();
+    this.week = this.date.week() - 1;
     const records: SprintRecord[] = [];
     for (const team of this.teams) {
       if (!team.boardID) continue;

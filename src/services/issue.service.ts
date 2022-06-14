@@ -57,18 +57,24 @@ export class IssueService {
 
   getSprintIssue(sprint: Sprint, issue: any): SprintIssue {
     const histories = issue.changelog?.histories || [];
+    const currentStatus = +issue.fields[this.STATUS].id;
     let planned = false;
     let finished = false;
     let tested = false;
     let uat = false;
     let deleted = false;
+    let sprintsChange = 0;
+    let sprintInFrom = false;
+    const allStatusInSprint = [];
     for (const history of histories) {
       if (history.items) {
         const created = new Date(history.created);
         for (const item of history.items) {
           if (item.field === this.SPRINT) {
+            sprintsChange++;
             const to: number[] = item.to?.split(',').map(Number) || [];
             const from: number[] = item.from?.split(',').map(Number) || [];
+            sprintInFrom = from.includes(sprint.id);
             if (to.includes(sprint.id)) {
               this.logService.log(`To sprint: ${issue.key}`);
               if (!planned) {
@@ -85,43 +91,46 @@ export class IssueService {
               }
             }
           }
-          if (item.field === this.STATUS) {
-            const to = +item.to;
-            if (to === this.FINISHED) {
-              finished =
-                created <= sprint.completeDate &&
-                created >= sprint.activatedDate;
-              this.logService.log(
-                `Finished ${finished}: ${issue.key} ${issue.fields.customfield_10106}`,
-              );
-            } else if (
-              !tested &&
-              (to === this.TESTED || to === this.READY_TEST)
-            ) {
-              tested =
-                created <= sprint.completeDate &&
-                created >= sprint.activatedDate;
-              this.logService.log(
-                `Tested ${tested}: ${issue.key} ${issue.fields.customfield_10106}`,
-              );
-            } else if (
-              !uat &&
-              (to === this.UAT ||
-                to === this.DEV ||
-                to === this.READY_DEV ||
-                to === this.PRE ||
-                to === this.READY_PRE)
-            ) {
-              uat =
-                created <= sprint.completeDate &&
-                created >= sprint.activatedDate;
-              this.logService.log(
-                `UAT ${uat}: ${issue.key} ${issue.fields.customfield_10106}`,
-              );
-            }
+          if (
+            item.field === this.STATUS &&
+            created <= sprint.completeDate &&
+            created >= sprint.activatedDate
+          ) {
+            allStatusInSprint.push({ ...item, created });
           }
         }
       }
+    }
+    if (allStatusInSprint.length) {
+      const latestStatusInSprint = allStatusInSprint.reduce((a, b) => {
+        return a.created > b.created ? a : b;
+      });
+      const to = +latestStatusInSprint.to;
+      if (to === this.FINISHED && currentStatus === this.FINISHED) {
+        finished = true;
+        this.logService.log(
+          `Finished ${finished}: ${issue.key} ${issue.fields.customfield_10106}`,
+        );
+      } else if (to === this.TESTED || to === this.READY_TEST) {
+        tested = true;
+        this.logService.log(
+          `Tested ${tested}: ${issue.key} ${issue.fields.customfield_10106}`,
+        );
+      } else if (
+        to === this.UAT ||
+        to === this.DEV ||
+        to === this.READY_DEV ||
+        to === this.PRE ||
+        to === this.READY_PRE
+      ) {
+        uat = true;
+        this.logService.log(
+          `UAT ${uat}: ${issue.key} ${issue.fields.customfield_10106}`,
+        );
+      }
+    }
+    if (sprintsChange === 1 && !planned && sprintInFrom) {
+      planned = true;
     }
     if (finished) {
       tested = false;
