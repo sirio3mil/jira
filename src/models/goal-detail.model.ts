@@ -1,4 +1,5 @@
 export interface GoalDetail {
+  code: number;
   team: string;
   stack: string;
   week: number;
@@ -10,5 +11,7 @@ export interface GoalDetail {
   timeSpent?: number;
   assigned?: string;
   storyPoints?: number;
+  estimated?: number;
+  sprintTimeSpent?: number;
   dueDate: Date;
 }

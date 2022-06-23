@@ -12,6 +12,7 @@ import weekOfYear from 'dayjs/plugin/weekOfYear';
 import { createFile } from '../storage.helper';
 import { parse } from 'json2csv';
 import { GoalDetail } from 'src/models/goal-detail.model';
+import { StoryPointService } from 'src/services/story-point.service';
 
 @Command({ name: 'goal', description: 'Get weekly goals' })
 export class GoalCommand extends TeamCommand {
@@ -25,6 +26,7 @@ export class GoalCommand extends TeamCommand {
     protected readonly teamService: TeamService,
     protected readonly issueService: IssueService,
     protected readonly sprintService: SprintService,
+    protected readonly storyPointService: StoryPointService,
   ) {
     super(logService, teamService, issueService);
     dayjs.extend(weekOfYear);
@@ -151,7 +153,22 @@ export class GoalCommand extends TeamCommand {
         this.logService.log(`Sprint: ${sprint.name}`);
         const issues = await this.getSprintIssues(team.boardID, sprint.id);
         for (const issue of issues) {
+          const timeSpent = this.issueService.getDevelopmentTime(
+            issue,
+            this.emails,
+          );
+          const estimated = this.storyPointService.toSeconds(
+            issue.fields.customfield_10106,
+            timeSpent,
+          );
+          const sprintTimeSpent = this.issueService.getDevelopmentTimeBetweenDates(
+            issue,
+            this.emails,
+            sprint.startDate,
+            sprint.endDate
+          );
           this.issues.push({
+            code: team.code,
             team: team.name,
             stack: team.stack,
             week: this.week,
@@ -160,7 +177,9 @@ export class GoalCommand extends TeamCommand {
             summary: issue.fields.summary,
             issueType: issue.fields.issuetype.name,
             status: issue.fields.status.name,
-            timeSpent: issue.fields.aggregatetimespent,
+            timeSpent,
+            estimated,
+            sprintTimeSpent,
             assigned: issue.fields.assignee
               ? issue.fields.assignee.displayName
               : '',

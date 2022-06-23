@@ -55,6 +55,33 @@ export class IssueService {
     return aggregateTimeSpent;
   }
 
+  getDevelopmentTimeBetweenDates(
+    issue: any,
+    developersEmails: string[],
+    start: Date,
+    end: Date,
+  ): number {
+    let aggregateTimeSpent = issue.fields.aggregatetimespent;
+    if (!aggregateTimeSpent) {
+      return 0;
+    }
+    const worklogs = issue.fields.worklog?.worklogs || [];
+    if (worklogs.length) {
+      for (const worklog of worklogs) {
+        if (worklog.timeSpentSeconds) {
+          const authorEmail = worklog.author?.emailAddress;
+          const date = new Date(worklog.started);
+          if (authorEmail && !developersEmails.includes(authorEmail)) {
+            aggregateTimeSpent -= worklog.timeSpentSeconds;
+          } else if (date < start || date > end) {
+            aggregateTimeSpent -= worklog.timeSpentSeconds;
+          }
+        }
+      }
+    }
+    return aggregateTimeSpent;
+  }
+
   getSprintIssue(sprint: Sprint, issue: any): SprintIssue {
     const histories = issue.changelog?.histories || [];
     const currentStatus = +issue.fields[this.STATUS].id;
