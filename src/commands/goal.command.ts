@@ -161,12 +161,13 @@ export class GoalCommand extends TeamCommand {
             issue.fields.customfield_10106,
             timeSpent,
           );
-          const sprintTimeSpent = this.issueService.getDevelopmentTimeBetweenDates(
-            issue,
-            this.emails,
-            sprint.startDate,
-            sprint.endDate
-          );
+          const sprintTimeSpent =
+            this.issueService.getDevelopmentTimeBetweenDates(
+              issue,
+              this.emails,
+              sprint.startDate,
+              sprint.endDate,
+            );
           this.issues.push({
             code: team.code,
             team: team.name,
