@@ -14,7 +14,7 @@ import { parse } from 'json2csv';
 import { GoalDetail } from 'src/models/goal-detail.model';
 import { StoryPointService } from 'src/services/story-point.service';
 
-@Command({ name: 'goal', description: 'Get weekly goals' })
+@Command({ name: 'goal', description: 'Get weekly goals for weekly report' })
 export class GoalCommand extends TeamCommand {
   issues: GoalDetail[] = [];
   protected date: dayjs.Dayjs;
