@@ -17,6 +17,7 @@ import mysql from 'mysql2';
 import { JiraRepository } from './repositories/JiraRepository';
 import { SubtaskCommand } from './commands/subtask.command';
 import { GoalCommand } from './commands/goal.command';
+import { BPMCommand } from './commands/bpm.command';
 
 const connectionFactory = {
   provide: "CONNECTION",
@@ -54,6 +55,7 @@ const connectionFactory = {
     TaskCommand,
     SprintCommand,
     SubtaskCommand,
+    BPMCommand,
     LogService, 
     JiraService, 
     TeamService, 

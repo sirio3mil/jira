@@ -9,6 +9,20 @@ export class JiraRepository {
     this.connection = connection;
   }
 
+  async getProjectIssues(project: number): Promise<any> {
+    return new Promise((res) => {
+      const query = `SELECT i.ID,
+          concat(p.pkey, '-', i.issuenum) pKey
+        FROM jiraissue i
+        INNER JOIN project p on i.PROJECT = p.ID
+        WHERE p.ID = ${project}`;
+      this.connection.execute(query, (e, rows) => {
+        if (e) throw e;
+        res(rows);
+      });
+    });
+  }
+
   async getPairProgrammingSubtasks(
     project: number,
     date: string,

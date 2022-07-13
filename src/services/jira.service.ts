@@ -19,9 +19,9 @@ export class JiraService {
     );
   }
 
-  async findByKey(key: string): Promise<any> {
+  async findByKey(key: string, fields = '*all'): Promise<any> {
     const config = {
-      url: `/rest/api/2/issue/${key}?fields=*all&fieldsByKeys=false`,
+      url: `/rest/api/2/issue/${key}?fields=${fields}&fieldsByKeys=false`,
     };
     return await lastValueFrom(
       this.httpService.get(config.url).pipe(
