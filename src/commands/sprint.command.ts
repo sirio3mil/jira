@@ -12,7 +12,7 @@ import weekOfYear from 'dayjs/plugin/weekOfYear';
 
 @Command({ name: 'sprint', description: 'Get sprints stats' })
 export class SprintCommand extends TeamCommand {
-  sprintsByBoard = 2;
+  sprintsByBoard = 4;
 
   constructor(
     protected readonly logService: LogService,
