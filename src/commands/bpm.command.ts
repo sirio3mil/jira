@@ -23,13 +23,14 @@ export class BPMCommand extends TeamCommand {
     protected readonly jiraService: JiraService,
   ) {
     super(logService, teamService, issueService);
-    this.prefix = 'multi-user-subtasks';
+    this.prefix = 'bpm';
   }
 
   protected async getRelatedIds(keys: any[]) {
     const relatedIds = [];
     for (const key of keys) {
       this.checkedIssues.push(key);
+      const parent = this.getParent(key);
       const issue = await this.jiraService.findByKey(
         key,
         'issuelinks,subtasks,issuetype,timetracking',
@@ -41,14 +42,17 @@ export class BPMCommand extends TeamCommand {
       if (issue.fields.issuelinks?.length) {
         issue.fields.issuelinks.forEach((link) => {
           if (link.inwardIssue) {
+            parent.related.push(link.inwardIssue.key);
             relatedIds.push(link.inwardIssue.key);
           } else if (link.outwardIssue) {
+            parent.related.push(link.outwardIssue.key);
             relatedIds.push(link.outwardIssue.key);
           }
         });
       }
       if (issue.fields.subtasks?.length) {
         issue.fields.subtasks.forEach((subtask) => {
+          parent.related.push(subtask.key);
           relatedIds.push(subtask.key);
         });
       }
@@ -57,7 +61,7 @@ export class BPMCommand extends TeamCommand {
   }
 
   protected getParent(key: string) {
-    this.tree.find((data) => data.related.includes(key));
+    return this.tree.find((data) => data.related.includes(key));
   }
 
   protected async getIssues() {
@@ -74,6 +78,32 @@ export class BPMCommand extends TeamCommand {
       keys = await this.getRelatedIds(keys);
       this.logService.log(`${keys.length} issues found after iteration`);
     } while (keys.length);
-    return {};
+    const results = {};
+    for (const key in this.data) {
+      this.logService.log(`${key}`);
+      const data = this.data[key];
+      this.logService.log(`${data.type}`);
+      const parent = this.getParent(key);
+      const parentKey = parent.related[0];
+      this.logService.log(`${parentKey} related issue`);
+      const time = data.time ? +data.time : 0;
+      if (!results.hasOwnProperty(parentKey)) {
+        results[parentKey] = {
+          Epic: 0,
+          Historia: 0,
+          Subtarea: 0,
+          Tarea: 0,
+          Defecto: 0,
+          Error: 0,
+        };
+      }
+      if (!results[parentKey].hasOwnProperty(data.type)) {
+        throw new Error(`Unknown type ${data.type}`);
+      }
+      results[parentKey][data.type] += time;
+    }
+    return Object.keys(results).map(function (key) {
+      return { key, ...results[key] };
+    });
   }
 }
