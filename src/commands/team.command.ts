@@ -7,7 +7,7 @@ import { Team } from '../models/team.model';
 import { IssueService } from 'src/services/issue.service';
 import * as fs from 'fs';
 
-export abstract class TeamCommand implements CommandRunner {
+export abstract class TeamCommand extends CommandRunner {
   teams: Team[] = [];
   emails: string[] = [];
   prefix = 'issues';
@@ -19,6 +19,7 @@ export abstract class TeamCommand implements CommandRunner {
     protected readonly teamService: TeamService,
     protected readonly issueService: IssueService,
   ) {
+    super();
     this.teams = this.teamService.getTeams();
     this.emails = this.teamService.getEmails();
   }
