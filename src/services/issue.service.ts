@@ -11,6 +11,7 @@ export class IssueService {
   readonly READY_TEST = 10302;
   readonly DEV = 10401;
   readonly READY_DEV = 10213;
+  readonly REV_DEV = 10300;
   readonly PRE = 10216;
   readonly READY_PRE = 10214;
   readonly UAT = 11000;
@@ -133,12 +134,17 @@ export class IssueService {
         return a.created > b.created ? a : b;
       });
       const to = +latestStatusInSprint.to;
+      this.logService.log(`Latest status in sprint: ${issue.key} ${to}`);
       if (to === this.FINISHED && currentStatus === this.FINISHED) {
         finished = true;
         this.logService.log(
           `Finished ${finished}: ${issue.key} ${issue.fields.customfield_10106}`,
         );
-      } else if (to === this.TESTED || to === this.READY_TEST) {
+      } else if (
+        to === this.TESTED ||
+        to === this.READY_TEST ||
+        to === this.REV_DEV
+      ) {
         tested = true;
         this.logService.log(
           `Tested ${tested}: ${issue.key} ${issue.fields.customfield_10106}`,
