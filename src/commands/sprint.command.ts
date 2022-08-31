@@ -1,12 +1,12 @@
 import { Command } from 'nest-commander';
 import { JiraService } from '../services/jira.service';
 import { LogService } from '../services/log.service';
-import { IssueService } from 'src/services/issue.service';
+import { IssueService } from '../services/issue.service';
 import { TeamService } from '../services/team.service';
 import { TeamCommand } from './team.command';
-import { SprintService } from 'src/services/sprint.service';
-import { Sprint } from 'src/models/sprint.model';
-import { SprintRecord } from 'src/models/sprint-record.model';
+import { SprintService } from '../services/sprint.service';
+import { Sprint } from '../models/sprint.model';
+import { SprintRecord } from '../models/sprint-record.model';
 import dayjs from 'dayjs';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 

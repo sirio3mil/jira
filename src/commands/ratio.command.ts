@@ -1,10 +1,10 @@
 import { Command } from 'nest-commander';
 import { JiraService } from '../services/jira.service';
 import { LogService } from '../services/log.service';
-import { IssueService } from 'src/services/issue.service';
+import { IssueService } from '../services/issue.service';
 import { Record } from '../models/record.model';
 import { TeamService } from '../services/team.service';
-import { StoryPointService } from 'src/services/story-point.service';
+import { StoryPointService } from '../services/story-point.service';
 import { TeamCommand } from './team.command';
 
 @Command({ name: 'ratio', description: 'Get story points ratio stats' })

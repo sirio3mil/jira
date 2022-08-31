@@ -2,9 +2,9 @@ import { Command } from 'nest-commander';
 import { LogService } from '../services/log.service';
 import { TeamService } from '../services/team.service';
 import { TeamCommand } from './team.command';
-import { IssueService } from 'src/services/issue.service';
-import { JiraRepository } from 'src/repositories/JiraRepository';
-import { JiraService } from 'src/services/jira.service';
+import { IssueService } from '../services/issue.service';
+import { JiraRepository } from '../repositories/JiraRepository';
+import { JiraService } from '../services/jira.service';
 
 @Command({
   name: 'bpm',

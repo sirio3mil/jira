@@ -2,10 +2,10 @@ import { Command } from 'nest-commander';
 import { JiraService } from '../services/jira.service';
 import { LogService } from '../services/log.service';
 import { TeamService } from '../services/team.service';
-import { StoryPointService } from 'src/services/story-point.service';
+import { StoryPointService } from '../services/story-point.service';
 import { TeamCommand } from './team.command';
-import { BugRecord } from 'src/models/bug-record.model';
-import { IssueService } from 'src/services/issue.service';
+import { BugRecord } from '../models/bug-record.model';
+import { IssueService } from '../services/issue.service';
 
 @Command({ name: 'bug', description: 'Get bugs and defects stats' })
 export class BugCommand extends TeamCommand {

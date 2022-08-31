@@ -2,12 +2,12 @@ import { Command } from 'nest-commander';
 import { JiraService } from '../services/jira.service';
 import { LogService } from '../services/log.service';
 import { TeamService } from '../services/team.service';
-import { StoryPointService } from 'src/services/story-point.service';
+import { StoryPointService } from '../services/story-point.service';
 import { TeamCommand } from './team.command';
-import { Stat } from 'src/models/stat.model';
-import { StatRecord } from 'src/models/stat-record.model';
+import { Stat } from '../models/stat.model';
+import { StatRecord } from '../models/stat-record.model';
 import * as fs from 'fs';
-import { IssueService } from 'src/services/issue.service';
+import { IssueService } from '../services/issue.service';
 
 @Command({ name: 'task', description: 'Get tasks vs bugs and defects stats' })
 export class TaskCommand extends TeamCommand {

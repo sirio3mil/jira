@@ -1,18 +1,18 @@
 import { Command } from 'nest-commander';
 import { JiraService } from '../services/jira.service';
 import { LogService } from '../services/log.service';
-import { IssueService } from 'src/services/issue.service';
+import { IssueService } from '../services/issue.service';
 import { TeamService } from '../services/team.service';
 import { TeamCommand } from './team.command';
-import { SprintService } from 'src/services/sprint.service';
-import { Sprint } from 'src/models/sprint.model';
-import { SprintRecord } from 'src/models/sprint-record.model';
+import { SprintService } from '../services/sprint.service';
+import { Sprint } from '../models/sprint.model';
+import { SprintRecord } from '../models/sprint-record.model';
 import dayjs from 'dayjs';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import { createFile } from '../storage.helper';
 import { parse } from 'json2csv';
-import { GoalDetail } from 'src/models/goal-detail.model';
-import { StoryPointService } from 'src/services/story-point.service';
+import { GoalDetail } from '../models/goal-detail.model';
+import { StoryPointService } from '../services/story-point.service';
 
 @Command({ name: 'goal', description: 'Get weekly goals for weekly report' })
 export class GoalCommand extends TeamCommand {
