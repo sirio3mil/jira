@@ -95,6 +95,8 @@ export class BPMCommand extends TeamCommand {
           Tarea: 0,
           Defecto: 0,
           Error: 0,
+          Analisis: 0,
+          Request: 0,
         };
       }
       if (!results[parentKey].hasOwnProperty(data.type)) {
