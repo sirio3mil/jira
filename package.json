@@ -46,7 +46,7 @@
     "@types/mysql2": "github:types/mysql2",
     "@types/node": "^18.7.16",
     "@types/supertest": "^2.0.12",
-    "@typescript-eslint/eslint-plugin": "^5.36.2",
+    "@typescript-eslint/eslint-plugin": "^5.37.0",
     "@typescript-eslint/parser": "^5.36.2",
     "eslint": "^8.23.0",
     "eslint-config-prettier": "^8.5.0",
