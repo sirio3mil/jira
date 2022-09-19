@@ -14,6 +14,7 @@ export class BPMCommand extends TeamCommand {
   checkedIssues: number[] = [];
   data = {};
   tree: any[] = [];
+  epicIssueType = 10000;
 
   constructor(
     protected readonly logService: LogService,
@@ -29,12 +30,14 @@ export class BPMCommand extends TeamCommand {
   protected async getRelatedIds(keys: any[]) {
     const relatedIds = [];
     for (const key of keys) {
+      this.logService.log(`checking ${key}`);
       this.checkedIssues.push(key);
       const parent = this.getParent(key);
       const issue = await this.jiraService.findByKey(
         key,
         'issuelinks,subtasks,issuetype,timetracking',
       );
+      const issueType = +issue.fields.issuetype.id;
       this.data[key] = {
         type: issue.fields.issuetype.name,
         time: issue.fields.timetracking.timeSpentSeconds,
@@ -56,6 +59,18 @@ export class BPMCommand extends TeamCommand {
           relatedIds.push(subtask.key);
         });
       }
+      if (issueType === this.epicIssueType) {
+        const issuesInEpic = await this.jiraService.findByEpic(key, 'key');
+        if (issuesInEpic.issues?.length) {
+          issuesInEpic.issues.forEach((issue) => {
+            this.logService.log(
+              `checking epic ${key} found issue ${issue.key}`,
+            );
+            parent.related.push(issue.key);
+            relatedIds.push(issue.key);
+          });
+        }
+      }
     }
     return relatedIds.filter((key) => !this.checkedIssues.includes(key));
   }
@@ -64,10 +79,15 @@ export class BPMCommand extends TeamCommand {
     return this.tree.find((data) => data.related.includes(key));
   }
 
-  protected async getIssues() {
-    const project = 11301;
-    const rows = await this.jiraRepository.getProjectIssues(project);
-    let keys = rows.map((row) => row.pKey);
+  protected async getIssues(passedParam: string[]) {
+    let keys = [];
+    if (!!passedParam[0]) {
+      keys = [passedParam[0]];
+    } else {
+      const project = 11301;
+      const rows = await this.jiraRepository.getProjectIssues(project);
+      keys = rows.map((row) => row.pKey);
+    }
     keys.forEach((key) => {
       this.tree.push({
         related: [key],

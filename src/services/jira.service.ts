@@ -31,4 +31,17 @@ export class JiraService {
       ),
     );
   }
+
+  async findByEpic(epicKey: string, fields = '*all'): Promise<any> {
+    const config = {
+      url: `/rest/agile/1.0/epic/${epicKey}/issue?fields=${fields}&fieldsByKeys=false`,
+    };
+    return await lastValueFrom(
+      this.httpService.get(config.url).pipe(
+        map((response) => {
+          return response.data;
+        }),
+      ),
+    );
+  }
 }
