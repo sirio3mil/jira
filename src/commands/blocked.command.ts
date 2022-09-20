@@ -30,7 +30,10 @@ export class BlockedCommand extends TeamCommand {
     const rows = await this.jiraRepository.getBlockedIssuesStatusChanges(
       teamLeaders,
     );
-    const results = teamLeaders.reduce((a, v) => ({ ...a, [v]: 0 }), {});
+    const results = teamLeaders.reduce(
+      (a, v) => ({ ...a, [v]: { time: 0, tasks: [] } }),
+      {},
+    );
     this.logService.log(`${rows.length}`);
     let previous: any;
     await rows.forEach(async (row) => {
@@ -40,7 +43,10 @@ export class BlockedCommand extends TeamCommand {
           const endTime = new Date(row.created);
           const difference = endTime.getTime() - startTime.getTime();
           const resultInMinutes = Math.round(difference / 60000);
-          results[row.lower_user_name] += resultInMinutes;
+          results[row.lower_user_name].time += resultInMinutes;
+          if (!results[row.lower_user_name].tasks.includes(row.pkey)) {
+            results[row.lower_user_name].tasks.push(row.pkey);
+          }
         }
       } else if (previous?.pkey && previous.newvalue === 10118) {
         // check if last status is blocked
@@ -52,7 +58,12 @@ export class BlockedCommand extends TeamCommand {
           const endTime = new Date();
           const difference = endTime.getTime() - startTime.getTime();
           const resultInMinutes = Math.round(difference / 60000);
-          results[previous.lower_user_name] += resultInMinutes;
+          results[previous.lower_user_name].time += resultInMinutes;
+          if (
+            !results[previous.lower_user_name].tasks.includes(previous.pkey)
+          ) {
+            results[previous.lower_user_name].tasks.push(previous.pkey);
+          }
         }
       }
       previous = { ...row };
@@ -60,7 +71,8 @@ export class BlockedCommand extends TeamCommand {
     return Object.keys(results).map(function (key) {
       return {
         tl: key,
-        time: results[key],
+        time: results[key].time,
+        tasks: results[key].tasks.length,
       };
     });
   }
