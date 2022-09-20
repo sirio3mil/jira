@@ -19,6 +19,7 @@ import { SubtaskCommand } from './commands/subtask.command';
 import { GoalCommand } from './commands/goal.command';
 import { BPMCommand } from './commands/bpm.command';
 import { WorklogCommand } from './commands/worklog.command';
+import { BlockedCommand } from './commands/blocked.command';
 
 const connectionFactory = {
   provide: "CONNECTION",
@@ -58,6 +59,7 @@ const connectionFactory = {
     SubtaskCommand,
     BPMCommand,
     WorklogCommand,
+    BlockedCommand,
     LogService, 
     JiraService, 
     TeamService, 

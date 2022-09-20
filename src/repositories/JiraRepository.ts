@@ -36,6 +36,53 @@ export class JiraRepository {
     });
   }
 
+  async getBlockedIssuesStatusChanges(users: string[]): Promise<any> {
+    return new Promise((res) => {
+      const query = `SELECT concat(p.pkey, '-', s.issuenum) pkey
+                      ,i.id
+                      ,i.oldvalue
+                      ,i.oldstring
+                      ,i.newvalue
+                      ,i.newstring
+                      ,g.issueid
+                      ,g.created
+                      ,u.lower_user_name
+                    FROM changeitem i
+                    inner join changegroup g ON i.groupid = g.id 
+                    inner join jiraissue s on s.id = g.issueid
+                    inner join project p on s.PROJECT = p.id
+                    inner join app_user u on u.user_key = g.author and u.lower_user_name in ('${users.join(
+                      "', '",
+                    )}')
+                    WHERE i.field = 'status'
+                      and (i.newstring like 'Bloqueado%' or i.oldstring like 'Bloqueado%')
+                    order by lower_user_name, issueid, created`;
+      this.connection.execute(query, (e, rows) => {
+        if (e) throw e;
+        res(rows);
+      });
+    });
+  }
+
+  async getLatestIssueStatus(issueId: number): Promise<any> {
+    return new Promise((res) => {
+      const query = `SELECT i.newvalue
+                      ,i.newstring
+                      ,i.id
+                    FROM changeitem i
+                    inner join changegroup g ON i.groupid = g.id 
+                    inner join jiraissue s on s.id = g.issueid
+                    WHERE g.issueid = ${issueId}
+                      AND i.field = 'status'
+                    ORDER BY g.created desc
+                    LIMIT 1`;
+      this.connection.execute(query, (e, rows) => {
+        if (e) throw e;
+        res(rows);
+      });
+    });
+  }
+
   async getProjectIssues(project: number): Promise<any> {
     return new Promise((res) => {
       const query = `SELECT i.ID,

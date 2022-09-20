@@ -26,6 +26,18 @@ export class TeamService {
     return [...new Set(this.emails)];
   }
 
+  getTeamLeaders(): string[] {
+    const emails: string[] = [];
+    stacks.teams.forEach((team) => {
+      team.members.map((member: any) => {
+        if (member.role === 'tl') {
+          emails.push(member.email);
+        }
+      });
+    });
+    return emails;
+  }
+
   getTeams(): Team[] {
     const teams: Team[] = [];
     stacks.teams.forEach((team) => {
