@@ -35,7 +35,7 @@ export class WorklogCommand extends TeamCommand {
       const parent = this.getParent(key);
       const issue = await this.jiraService.findByKey(
         key,
-        'issuelinks,subtasks,issuetype,timetracking',
+        'issuelinks,subtasks,issuetype,timetracking,customfield_11102',
       );
       this.logService.log(`checking ${key} with id ${issue.id}`);
       const issueType = +issue.fields.issuetype.id;
@@ -43,6 +43,9 @@ export class WorklogCommand extends TeamCommand {
         id: +issue.id,
         type: issue.fields.issuetype.name,
         time: issue.fields.timetracking.timeSpentSeconds,
+        bpm: {
+          author: issue.fields.customfield_11102,
+        },
       };
       if (issue.fields.issuelinks?.length) {
         issue.fields.issuelinks.forEach((link) => {
@@ -115,6 +118,7 @@ export class WorklogCommand extends TeamCommand {
         results.push({
           parentKey,
           key,
+          author: this.data[parentKey].bpm.author,
           ...worklog,
         });
       });
