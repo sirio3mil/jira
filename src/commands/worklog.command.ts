@@ -7,10 +7,10 @@ import { JiraRepository } from '../repositories/JiraRepository';
 import { JiraService } from '../services/jira.service';
 
 @Command({
-  name: 'bpm',
-  description: 'Get bpm project issues',
+  name: 'worklog',
+  description: 'Get bpm project issues worklog',
 })
-export class BPMCommand extends TeamCommand {
+export class WorklogCommand extends TeamCommand {
   checkedIssues: number[] = [];
   data = {};
   tree: any[] = [];
@@ -100,34 +100,25 @@ export class BPMCommand extends TeamCommand {
       keys = await this.getRelatedIds(keys);
       this.logService.log(`${keys.length} issues found after iteration`);
     } while (keys.length);
-    const results = {};
+    const results = [];
     for (const key in this.data) {
       this.logService.log(`${key}`);
       const data = this.data[key];
       this.logService.log(`${data.type}`);
       const parent = this.getParent(key);
       const parentKey = parent.related[0];
-      this.logService.log(`${parentKey} related issue`);
-      const time = data.time ? +data.time : 0;
-      if (!results.hasOwnProperty(parentKey)) {
-        results[parentKey] = {
-          Epic: 0,
-          Historia: 0,
-          Subtarea: 0,
-          Tarea: 0,
-          Defecto: 0,
-          Error: 0,
-          Analisis: 0,
-          Request: 0,
-        };
-      }
-      if (!results[parentKey].hasOwnProperty(data.type)) {
-        throw new Error(`Unknown type ${data.type}`);
-      }
-      results[parentKey][data.type] += time;
+      const worklogs = await this.jiraRepository.getIssueWorklog(data.id);
+      this.logService.log(
+        `${parentKey} related issue ${key} with ${worklogs?.length} worklogs`,
+      );
+      worklogs.forEach((worklog) => {
+        results.push({
+          parentKey,
+          key,
+          ...worklog,
+        });
+      });
     }
-    return Object.keys(results).map(function (key) {
-      return { key, ...results[key] };
-    });
+    return results;
   }
 }

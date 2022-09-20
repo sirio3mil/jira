@@ -9,6 +9,33 @@ export class JiraRepository {
     this.connection = connection;
   }
 
+  async getIssueWorklog(issueID: number): Promise<any> {
+    return new Promise((res) => {
+      const query = `select t.pname type
+                      ,u.lower_user_name user
+                      ,c.display_name name
+                      ,c.lower_email_address email
+                      ,cast(w.startdate as date) created
+                      ,i.summary
+                      ,w.timeworked
+                      ,s.pname status
+                  from worklog w
+                  inner join jiraissue i on i.ID = w.issueID
+                  inner join issuestatus s on s.ID = i.issuestatus
+                  inner join app_user u on u.user_key = w.author
+                  inner join cwd_user c on u.lower_user_name = c.lower_user_name
+                  inner join issuetype t on t.id = i.issuetype
+                  where i.ID = ${issueID}
+                  order by email
+                    ,created
+                    ,type`;
+      this.connection.execute(query, (e, rows) => {
+        if (e) throw e;
+        res(rows);
+      });
+    });
+  }
+
   async getProjectIssues(project: number): Promise<any> {
     return new Promise((res) => {
       const query = `SELECT i.ID,

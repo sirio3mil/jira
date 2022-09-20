@@ -18,6 +18,7 @@ import { JiraRepository } from './repositories/JiraRepository';
 import { SubtaskCommand } from './commands/subtask.command';
 import { GoalCommand } from './commands/goal.command';
 import { BPMCommand } from './commands/bpm.command';
+import { WorklogCommand } from './commands/worklog.command';
 
 const connectionFactory = {
   provide: "CONNECTION",
@@ -56,6 +57,7 @@ const connectionFactory = {
     SprintCommand,
     SubtaskCommand,
     BPMCommand,
+    WorklogCommand,
     LogService, 
     JiraService, 
     TeamService, 
