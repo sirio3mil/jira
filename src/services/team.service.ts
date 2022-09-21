@@ -35,7 +35,7 @@ export class TeamService {
         }
       });
     });
-    return emails;
+    return [...new Set(emails)];
   }
 
   getTeams(): Team[] {
