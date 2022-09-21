@@ -86,7 +86,8 @@ export class JiraRepository {
   async getProjectIssues(project: number): Promise<any> {
     return new Promise((res) => {
       const query = `SELECT i.ID,
-          concat(p.pkey, '-', i.issuenum) pKey
+          concat(p.pkey, '-', i.issuenum) pKey,
+          i.summary
         FROM jiraissue i
         INNER JOIN project p on i.PROJECT = p.ID
         WHERE p.ID = ${project}`;
