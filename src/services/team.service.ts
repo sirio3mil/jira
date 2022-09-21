@@ -12,6 +12,7 @@ export class TeamService {
     middle: () => 10,
     junior: () => 1,
   };
+  anualHours = 1754;
 
   monthDiff(seniorityDate: Date) {
     const today = new Date();
@@ -36,6 +37,22 @@ export class TeamService {
       });
     });
     return [...new Set(emails)];
+  }
+
+  getSalaries() {
+    const workmates = [];
+    stacks.teams.forEach((team) => {
+      team.members.map((member: any) => {
+        if (!workmates.hasOwnProperty(member.email)) {
+          const hourCost = member.salary / this.anualHours;
+          workmates[member.email] = {
+            salary: member.salary,
+            hourCost: hourCost.toFixed(2),
+          };
+        }
+      });
+    });
+    return workmates;
   }
 
   getTeams(): Team[] {
