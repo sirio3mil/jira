@@ -121,6 +121,8 @@ export class WorklogCommand extends TeamCommand {
           parentKey,
           key,
           author: this.data[parentKey].bpm.author,
+          action: this.data[parentKey].bpm.action,
+          application: this.data[parentKey].bpm.application,
           ...worklog,
         });
       });
