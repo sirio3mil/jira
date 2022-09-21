@@ -35,7 +35,7 @@ export class CostCommand extends TeamCommand {
       const parent = this.getParent(key);
       const issue = await this.jiraService.findByKey(
         key,
-        'issuelinks,subtasks,issuetype,timetracking,customfield_11102,summary',
+        'issuelinks,subtasks,issuetype,timetracking,customfield_11102,summary,customfield_11100',
       );
       this.logService.log(`checking ${key} with id ${issue.id}`);
       const issueType = +issue.fields.issuetype.id;
@@ -45,6 +45,7 @@ export class CostCommand extends TeamCommand {
         time: issue.fields.timetracking.timeSpentSeconds,
         bpm: {
           author: issue.fields.customfield_11102,
+          accion: issue.fields.customfield_11100,
         },
         summary: issue.fields.summary,
       };
