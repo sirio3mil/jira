@@ -6,6 +6,7 @@ import { StoryPointService } from '../services/story-point.service';
 import { TeamCommand } from './team.command';
 import { BugRecord } from '../models/bug-record.model';
 import { IssueService } from '../services/issue.service';
+import { Member } from 'src/models/member.model';
 
 @Command({ name: 'bug', description: 'Get bugs and defects stats' })
 export class BugCommand extends TeamCommand {
@@ -55,17 +56,16 @@ export class BugCommand extends TeamCommand {
         const team = this.getIssueTeam(issue);
         if (!team) continue;
         const solver = team.members.find(
-          (member: { email: string }) =>
-            member.email === issue.fields.assignee.emailAddress,
+          (member) => member.email === issue.fields.assignee.emailAddress,
         );
         let sourceIssue: any;
-        let assigned: any;
+        let assigned: Member;
         if (issue.fields.issuelinks?.length) {
           const sourceIssueKey = this.getSourceIssue(issue.fields.issuelinks);
           if (sourceIssueKey) {
             sourceIssue = await this.jiraService.findByKey(sourceIssueKey);
             assigned = team.members.find(
-              (member: { email: string }) =>
+              (member) =>
                 member.email === sourceIssue.fields?.assignee?.emailAddress,
             );
           }

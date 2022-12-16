@@ -11,7 +11,8 @@ export class JiraRepository {
 
   async getIssueWorklog(issueID: number): Promise<any> {
     return new Promise((res) => {
-      const query = `select t.pname type
+      const query = `select w.ID worklogId
+                      ,t.pname type
                       ,u.lower_user_name user
                       ,c.display_name name
                       ,c.lower_email_address email

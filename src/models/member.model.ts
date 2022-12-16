@@ -8,4 +8,5 @@ export interface Member {
   active: boolean;
   role: string;
   salary: number;
+  seniority: number;
 }

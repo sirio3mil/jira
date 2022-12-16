@@ -24,7 +24,7 @@ export abstract class TeamCommand extends CommandRunner {
     this.emails = this.teamService.getEmails();
   }
 
-  protected getTeamByEmail(email: string, date: Date): any {
+  protected getTeamByEmail(email: string, date: Date): Team {
     const team = this.teams.find(
       (team) =>
         team.members.filter((member) => {
@@ -40,7 +40,7 @@ export abstract class TeamCommand extends CommandRunner {
     return team;
   }
 
-  protected getTeamBySprint(sprints: string[]): any {
+  protected getTeamBySprint(sprints: string[]): Team {
     const team = this.teams.find(
       (team) =>
         sprints.filter((description) =>
@@ -50,7 +50,11 @@ export abstract class TeamCommand extends CommandRunner {
     return team;
   }
 
-  protected getTeamByFields(sprints: string[], email: string, date: Date): any {
+  protected getTeamByFields(
+    sprints: string[],
+    email: string,
+    date: Date,
+  ): Team {
     let team: any;
     if (sprints?.length) {
       team = this.getTeamBySprint(sprints);
@@ -65,7 +69,7 @@ export abstract class TeamCommand extends CommandRunner {
     return team;
   }
 
-  protected getIssueTeam(issue: any): any {
+  protected getIssueTeam(issue: any): Team {
     return this.getTeamByFields(
       issue.fields.customfield_10105,
       issue.fields.assignee.emailAddress,
