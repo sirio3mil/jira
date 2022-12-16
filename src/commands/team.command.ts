@@ -40,34 +40,37 @@ export abstract class TeamCommand extends CommandRunner {
     return team;
   }
 
-  protected getTeamBySprint(sprint: string[]): any {
+  protected getTeamBySprint(sprints: string[]): any {
     const team = this.teams.find(
       (team) =>
-        sprint.filter((description) =>
+        sprints.filter((description) =>
           description.toLowerCase().includes(team.name.toLowerCase()),
         ).length > 0,
     );
     return team;
   }
 
-  protected getIssueTeam(issue: any): any {
+  protected getTeamByFields(sprints: string[], email: string, date: Date): any {
     let team: any;
-    if (issue.fields.customfield_10105) {
-      team = this.getTeamBySprint(issue.fields.customfield_10105);
+    if (sprints?.length) {
+      team = this.getTeamBySprint(sprints);
     }
-    if (!team && issue.fields.assignee?.emailAddress) {
-      team = this.getTeamByEmail(
-        issue.fields.assignee.emailAddress,
-        this.issueService.getResolutionDate(issue),
-      );
+    if (!team && email) {
+      team = this.getTeamByEmail(email, date);
       if (!team) {
-        this.logService.log(
-          'No team found for ' + issue.fields.assignee.emailAddress,
-        );
-        this.unidentifiedMails.push(issue.fields.assignee.emailAddress);
+        this.logService.log('No team found for ' + email);
+        this.unidentifiedMails.push(email);
       }
     }
     return team;
+  }
+
+  protected getIssueTeam(issue: any): any {
+    return this.getTeamByFields(
+      issue.fields.customfield_10105,
+      issue.fields.assignee.emailAddress,
+      this.issueService.getResolutionDate(issue),
+    );
   }
 
   protected logUnidentifiedMails() {
