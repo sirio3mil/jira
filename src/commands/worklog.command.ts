@@ -129,10 +129,10 @@ export class WorklogCommand extends TeamCommand {
           author: this.data[parentKey].bpm.author,
           action: this.data[parentKey].bpm.action,
           application: this.data[parentKey].bpm.application,
+          team: team?.name,
+          stack: team?.stack,
+          color: team?.color,
           ...worklog,
-          team: team.name,
-          stack: team.stack,
-          color: team.color,
         });
       });
     }
