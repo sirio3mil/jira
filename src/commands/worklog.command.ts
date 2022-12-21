@@ -14,6 +14,7 @@ export class WorklogCommand extends TeamCommand {
   checkedIssues: number[] = [];
   data = {};
   tree: any[] = [];
+  projects: any[] = [];
   epicIssueType = 10000;
   worklog = {};
 
@@ -95,6 +96,9 @@ export class WorklogCommand extends TeamCommand {
       const project = 11301;
       const rows = await this.jiraRepository.getProjectIssues(project);
       keys = rows.map((row) => row.pKey);
+      rows.forEach((row) => {
+        this.projects[row.pKey] = row.summary;
+      });
     }
     keys.forEach((key) => {
       this.tree.push({
@@ -125,6 +129,7 @@ export class WorklogCommand extends TeamCommand {
         );
         results.push({
           parentKey,
+          project: this.projects[parentKey],
           key,
           author: this.data[parentKey].bpm.author,
           action: this.data[parentKey].bpm.action,
