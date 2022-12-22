@@ -127,12 +127,16 @@ export class WorklogCommand extends TeamCommand {
           worklog.email,
           worklog.created,
         );
+        let action = this.data[parentKey].bpm.action;
+        if (this.data[key]?.bpm?.action) {
+          action = this.data[key].bpm.action;
+        }
         results.push({
           parentKey,
           project: this.projects[parentKey],
           key,
           author: this.data[parentKey].bpm.author,
-          action: this.data[parentKey].bpm.action,
+          action,
           application: this.data[parentKey].bpm.application,
           team: team?.name,
           stack: team?.stack,

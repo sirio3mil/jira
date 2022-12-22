@@ -13,8 +13,6 @@ export class JiraRepository {
     return new Promise((res) => {
       const query = `select w.ID worklogId
                       ,t.pname type
-                      ,u.lower_user_name user
-                      ,c.display_name name
                       ,c.lower_email_address email
                       ,cast(w.startdate as date) created
                       ,i.summary
