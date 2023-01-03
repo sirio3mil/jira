@@ -51,17 +51,21 @@ export class WorklogCommand extends TeamCommand {
       this.logService.log(`checking ${key} with id ${issue.id}`);
       const issueType = +issue.fields.issuetype.id;
       const action = issue.fields.customfield_11100;
+      let bpm = {};
+      if (!!issue.fields.customfield_11100) {
+        bpm = {
+          author: issue.fields.customfield_11102,
+          action: issue.fields.customfield_11100,
+          application: issue.fields.customfield_11103,
+        };
+      }
       this.data[key] = {
         id: +issue.id,
         type: issue.fields.issuetype.name,
         time: issue.fields.timetracking.timeSpentSeconds,
         sprints: issue.fields.customfield_10105,
         epicKey: issue.fields.customfield_10101,
-        bpm: {
-          author: issue.fields.customfield_11102,
-          action,
-          application: issue.fields.customfield_11103,
-        },
+        bpm,
       };
       const changes = {
         related: [],
@@ -167,7 +171,7 @@ export class WorklogCommand extends TeamCommand {
           worklog.email,
           worklog.created,
         );
-        let bpmData;
+        let bpmData: { author: string; action: string; application: string };
         if (!!epicData && epicData?.bpm?.action) {
           bpmData = epicData.bpm;
           this.logService.log(`${key} have epic data action ${bpmData.action}`);
