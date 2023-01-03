@@ -89,7 +89,8 @@ export class JiraRepository {
           i.summary
         FROM jiraissue i
         INNER JOIN project p on i.PROJECT = p.ID
-        WHERE p.ID = ${project}`;
+        WHERE p.ID = ${project} 
+        ORDER BY i.ID`;
       this.connection.execute(query, (e, rows) => {
         if (e) throw e;
         res(rows);
