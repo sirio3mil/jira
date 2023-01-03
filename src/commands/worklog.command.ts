@@ -17,6 +17,7 @@ export class WorklogCommand extends TeamCommand {
   projects: any[] = [];
   epicIssueType = 10000;
   worklog = {};
+  scopeChanges: any[] = [];
 
   constructor(
     protected readonly logService: LogService,
@@ -27,6 +28,59 @@ export class WorklogCommand extends TeamCommand {
   ) {
     super(logService, teamService, issueService);
     this.prefix = 'bpm';
+  }
+
+  protected getScopeChangeKey(key: string) {
+    const scope = this.scopeChanges.find((data) => data.related.includes(key));
+    if (!!scope?.key) {
+      return scope.key;
+    }
+
+    return null;
+  }
+
+  protected async setScopeChangesIds(drKeys: any[]) {
+    for (const key of drKeys) {
+      const issue = await this.jiraService.findByKey(
+        key,
+        'issuelinks,subtasks,issuetype,timetracking,customfield_11102,customfield_11100,customfield_11103,customfield_10105',
+      );
+      this.logService.log(`checking scope change ${key} with id ${issue.id}`);
+      const issueType = +issue.fields.issuetype.id;
+      if (!!issue.fields.customfield_11100.indexOf('alcance')) {
+        const changes = {
+          related: [],
+          key,
+        };
+        if (issue.fields.issuelinks?.length) {
+          issue.fields.issuelinks.forEach((link) => {
+            if (link.inwardIssue) {
+              changes.related.push(link.inwardIssue.key);
+            } else if (link.outwardIssue) {
+              changes.related.push(link.outwardIssue.key);
+            }
+          });
+        }
+        if (issue.fields.subtasks?.length) {
+          issue.fields.subtasks.forEach((subtask) => {
+            changes.related.push(subtask.key);
+          });
+        }
+        if (issueType === this.epicIssueType) {
+          const issuesInEpic = await this.jiraService.findByEpic(key, 'key');
+          if (issuesInEpic.issues?.length) {
+            issuesInEpic.issues.forEach((issue) => {
+              this.logService.log(
+                `checking epic ${key} found issue ${issue.key}`,
+              );
+              changes.related.push(issue.key);
+            });
+          }
+        }
+        this.scopeChanges.push(changes);
+      }
+    }
+    return true;
   }
 
   protected async getRelatedIds(keys: any[]) {
