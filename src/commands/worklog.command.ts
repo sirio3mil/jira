@@ -17,6 +17,7 @@ export class WorklogCommand extends TeamCommand {
   projects: any[] = [];
   epicIssueType = 10000;
   worklog = {};
+  scopeChanges: any[] = [];
 
   constructor(
     protected readonly logService: LogService,
@@ -29,6 +30,15 @@ export class WorklogCommand extends TeamCommand {
     this.prefix = 'bpm';
   }
 
+  protected getScopeChangeKey(key: string) {
+    const scope = this.scopeChanges.find((data) => data.related.includes(key));
+    if (!!scope?.key) {
+      return scope.key;
+    }
+
+    return null;
+  }
+
   protected async getRelatedIds(keys: any[]) {
     const relatedIds = [];
     for (const key of keys) {
@@ -36,29 +46,48 @@ export class WorklogCommand extends TeamCommand {
       const parent = this.getParent(key);
       const issue = await this.jiraService.findByKey(
         key,
-        'issuelinks,subtasks,issuetype,timetracking,customfield_11102,customfield_11100,customfield_11103,customfield_10105',
+        'issuelinks,subtasks,issuetype,timetracking,customfield_11102,customfield_11100,customfield_11103,customfield_10105,customfield_10101',
       );
       this.logService.log(`checking ${key} with id ${issue.id}`);
       const issueType = +issue.fields.issuetype.id;
+      const action = issue.fields.customfield_11100;
       this.data[key] = {
         id: +issue.id,
         type: issue.fields.issuetype.name,
         time: issue.fields.timetracking.timeSpentSeconds,
         sprints: issue.fields.customfield_10105,
+        epicKey: issue.fields.customfield_10101,
         bpm: {
           author: issue.fields.customfield_11102,
-          action: issue.fields.customfield_11100,
+          action,
           application: issue.fields.customfield_11103,
         },
       };
+      const changes = {
+        related: [],
+        key,
+      };
+      let scopeChange = false;
+      if (!!action && action.indexOf('alcance') !== -1) {
+        this.logService.log(
+          `scope change detected ${key} with action ${action}`,
+        );
+        scopeChange = true;
+      }
       if (issue.fields.issuelinks?.length) {
         issue.fields.issuelinks.forEach((link) => {
           if (link.inwardIssue) {
             parent.related.push(link.inwardIssue.key);
             relatedIds.push(link.inwardIssue.key);
+            if (scopeChange) {
+              changes.related.push(link.inwardIssue.key);
+            }
           } else if (link.outwardIssue) {
             parent.related.push(link.outwardIssue.key);
             relatedIds.push(link.outwardIssue.key);
+            if (scopeChange) {
+              changes.related.push(link.outwardIssue.key);
+            }
           }
         });
       }
@@ -66,6 +95,9 @@ export class WorklogCommand extends TeamCommand {
         issue.fields.subtasks.forEach((subtask) => {
           parent.related.push(subtask.key);
           relatedIds.push(subtask.key);
+          if (scopeChange) {
+            changes.related.push(subtask.key);
+          }
         });
       }
       if (issueType === this.epicIssueType) {
@@ -77,7 +109,13 @@ export class WorklogCommand extends TeamCommand {
             );
             parent.related.push(issue.key);
             relatedIds.push(issue.key);
+            if (scopeChange) {
+              changes.related.push(issue.key);
+            }
           });
+        }
+        if (scopeChange) {
+          this.scopeChanges.push(changes);
         }
       }
     }
@@ -117,6 +155,8 @@ export class WorklogCommand extends TeamCommand {
       this.logService.log(`${data.type}`);
       const parent = this.getParent(key);
       const parentKey = parent.related[0];
+      const parentData = this.data[parentKey];
+      const epicData = !!data.epicKey ? this.data[data.epicKey] : null;
       const worklogs = await this.jiraRepository.getIssueWorklog(data.id);
       this.logService.log(
         `${parentKey} related issue ${key} with ${worklogs?.length} worklogs`,
@@ -127,17 +167,50 @@ export class WorklogCommand extends TeamCommand {
           worklog.email,
           worklog.created,
         );
-        let action = this.data[parentKey].bpm.action;
-        if (this.data[key]?.bpm?.action) {
-          action = this.data[key].bpm.action;
+        let bpmData;
+        if (!!epicData && epicData?.bpm?.action) {
+          bpmData = epicData.bpm;
+          this.logService.log(`${key} have epic data action ${bpmData.action}`);
+        }
+        if (data?.bpm?.action) {
+          bpmData = data.bpm;
+          this.logService.log(`${key} have data action ${bpmData.action}`);
+        }
+        let scopeKey = this.getScopeChangeKey(key);
+        if (!bpmData && !!scopeKey) {
+          const scopeData = this.data[scopeKey];
+          if (scopeData && scopeData?.bpm?.action) {
+            bpmData = scopeData.bpm;
+            this.logService.log(
+              `${key} is related with epic data ${scopeKey} action ${bpmData.action}`,
+            );
+          }
+        }
+        if (!bpmData && !!data.epicKey) {
+          scopeKey = this.getScopeChangeKey(data.epicKey);
+          if (!!scopeKey) {
+            const scopeData = this.data[scopeKey];
+            if (scopeData && scopeData?.bpm?.action) {
+              bpmData = scopeData.bpm;
+              this.logService.log(
+                `${key} with epic ${data.epicKey} related with epic ${scopeKey} data action ${bpmData.action}`,
+              );
+            }
+          }
+        }
+        if (!bpmData) {
+          bpmData = parentData.bpm;
+          this.logService.log(
+            `${key} have parent data action ${bpmData.action}`,
+          );
         }
         results.push({
           parentKey,
           project: this.projects[parentKey],
           key,
-          author: this.data[parentKey].bpm.author,
-          action,
-          application: this.data[parentKey].bpm.application,
+          author: bpmData.author,
+          action: bpmData.action,
+          application: bpmData.application,
           team: team?.name,
           stack: team?.stack,
           color: team?.color,
