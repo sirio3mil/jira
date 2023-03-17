@@ -125,8 +125,8 @@ export class GitlabCommand extends TeamCommand {
   protected async getIssues() {
     try {
       return this.getRepositoriesWithMostBranches();
-    } catch (e) {
-      this.logService.log('error');
+    } catch (error) {
+      this.logService.log(`Error getting issues: ${error}`);
     }
   }
 }
