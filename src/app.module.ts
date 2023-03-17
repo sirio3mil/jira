@@ -21,6 +21,7 @@ import { BPMCommand } from './commands/bpm.command';
 import { WorklogCommand } from './commands/worklog.command';
 import { BlockedCommand } from './commands/blocked.command';
 import { CostCommand } from './commands/cost.command';
+import { GitlabCommand } from './commands/gitlab.command';
 
 const connectionFactory = {
   provide: "CONNECTION",
@@ -55,6 +56,7 @@ const connectionFactory = {
     RatioCommand, 
     BugCommand, 
     GoalCommand,
+    GitlabCommand,
     TaskCommand,
     SprintCommand,
     SubtaskCommand,
