@@ -27,7 +27,7 @@
     "@nestjs/core": "^9.4.1",
     "@nestjs/platform-express": "^8.4.7",
     "axios": "^1.4.0",
-    "dayjs": "^1.11.7",
+    "dayjs": "^1.11.9",
     "fs": "^0.0.1-security",
     "json2csv": "^5.0.7",
     "mysql2": "^2.3.3",
